@@ -31,6 +31,39 @@ npm run dev
 
 Voir `.env.example`. Sur Vercel : ajouter aussi `CRON_SECRET` (les crons de `vercel.json` l'envoient en `Authorization: Bearer`).
 
+## Crons — plan Hobby vs Pro
+
+Vercel **Hobby** limite les crons à **1 exécution / jour**. Seul `stock-classify` (quotidien) est
+donc déclaré dans `vercel.json`. Les deux autres tournent plus souvent et doivent être :
+- soit déclenchés **manuellement** pendant les tests (commandes ci-dessous),
+- soit programmés automatiquement en passant le projet en **Pro** (voir plus bas).
+
+Déclenchement manuel (remplacer le domaine et `$CRON_SECRET`) :
+
+```bash
+# Taux de change (idéalement toutes les 6 h en prod)
+curl -H "Authorization: Bearer $CRON_SECRET" \
+  https://TON-DOMAINE.vercel.app/api/cron/fx-rates
+
+# Libération des réservations flash expirées (idéalement toutes les 10 min en prod)
+curl -H "Authorization: Bearer $CRON_SECRET" \
+  https://TON-DOMAINE.vercel.app/api/cron/expire-reservations
+
+# Classification stock + moteur de packs (déjà quotidien via vercel.json,
+# mais utile pour forcer un passage immédiat)
+curl -H "Authorization: Bearer $CRON_SECRET" \
+  https://TON-DOMAINE.vercel.app/api/cron/stock-classify
+```
+
+⚠️ `expire-reservations` doit tourner à la minute pour que les ventes flash se comportent
+correctement (un panier réservé 10 min bloque le stock jusqu'à sa libération). En production
+avec de vrais drops, passer en **Pro** et rétablir dans `vercel.json` :
+
+```json
+{ "path": "/api/cron/fx-rates",            "schedule": "0 */6 * * *" },
+{ "path": "/api/cron/expire-reservations", "schedule": "*/10 * * * *" }
+```
+
 ## Structure
 
 - `/` boutique (rail flash + Card-Gallery) · `/flash` drops live · `/product/[slug]` fiche
