@@ -1,0 +1,54 @@
+import Link from 'next/link';
+import { createClient } from '@/lib/supabase/server';
+import { localized, t } from '@/lib/i18n/dictionaries';
+import Countdown from '@/components/shop/Countdown';
+import LiveStockGauge from '@/components/shop/LiveStockGauge';
+import PriceReveal from '@/components/shop/PriceReveal';
+
+export const dynamic = 'force-dynamic';
+
+export default async function FlashPage() {
+  const locale = 'fr';
+  const supabase = await createClient();
+  const serverNow = new Date().toISOString();
+  const { data: sales } = await supabase
+    .from('flash_sales')
+    .select('id, title, ends_at, starts_at, flash_sale_items(id, flash_price, allocated_qty, remaining_qty, product:products(slug, title, brand, images, market_price, outlet_price, currency))')
+    .lte('starts_at', serverNow)
+    .gte('ends_at', serverNow)
+    .order('ends_at', { ascending: true });
+
+  return (
+    <main className="min-h-dvh max-w-7xl mx-auto px-4 py-8 space-y-10">
+      <Link href="/" className="text-sm text-app-muted hover:text-app-text transition-colors duration-120">← OUTRUSH</Link>
+      {(sales ?? []).length === 0 ? (
+        <div className="card-hunt p-16 text-center space-y-3">
+          <div className="font-display text-6xl text-app-accent opacity-40 select-none">⏱</div>
+          <p className="text-app-muted">{t(locale, 'hunt_empty')}</p>
+        </div>
+      ) : (
+        sales.map((sale) => (
+          <section key={sale.id} className="space-y-6">
+            <div className="text-center space-y-2 py-6">
+              <h1 className="font-display font-extrabold text-4xl">{localized(sale.title, locale)}</h1>
+              <Countdown endsAt={sale.ends_at} serverNow={serverNow} className="text-6xl text-app-accent" />
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {(sale.flash_sale_items ?? []).filter((i) => i.product).map((item, idx) => (
+                <Link key={item.id} href={`/product/${item.product.slug}`}
+                  className="card-hunt rise-in p-4 space-y-3" style={{ animationDelay: `${idx * 50}ms` }}>
+                  <p className="font-medium text-sm line-clamp-2">{localized(item.product.title, locale)}</p>
+                  <PriceReveal marketPrice={item.product.market_price} outletPrice={item.flash_price}
+                    currency={item.product.currency} locale={locale} />
+                  <LiveStockGauge itemId={item.id} allocated={item.allocated_qty}
+                    initialRemaining={item.remaining_qty}
+                    label={{ lastPiece: t(locale, 'last_piece'), left: t(locale, 'stock_left') }} />
+                </Link>
+              ))}
+            </div>
+          </section>
+        ))
+      )}
+    </main>
+  );
+}
