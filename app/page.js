@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { localized, t } from '@/lib/i18n/dictionaries';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, discountPct } from '@/lib/utils';
 import Countdown from '@/components/shop/Countdown';
 import LiveStockGauge from '@/components/shop/LiveStockGauge';
 import ProductCard from '@/components/shop/ProductCard';
@@ -14,7 +14,7 @@ export default async function HomePage() {
   const supabase = await createClient();
   const serverNow = new Date().toISOString();
 
-  const [{ data: flash }, { data: products }, { data: packs }] = await Promise.all([
+  const [{ data: flash }, { data: products }, { data: bestSellers }, { data: packs }, { data: categories }] = await Promise.all([
     supabase
       .from('flash_sales')
       .select('id, title, ends_at, flash_sale_items(id, flash_price, allocated_qty, remaining_qty, product:products(slug, title, brand, images, market_price, outlet_price, currency))')
@@ -25,32 +25,161 @@ export default async function HomePage() {
       .maybeSingle(),
     supabase
       .from('products')
-      .select('id, slug, title, brand, images, market_price, outlet_price, currency')
+      .select('id, slug, title, brand, images, market_price, outlet_price, currency, category_id')
       .eq('status', 'published')
       .order('created_at', { ascending: false })
-      .limit(24),
+      .limit(60),
+    supabase
+      .from('products')
+      .select('id, slug, title, brand, images, market_price, outlet_price, currency')
+      .eq('status', 'published')
+      .order('velocity_14d', { ascending: false })
+      .limit(12),
     supabase
       .from('packs')
       .select('id, slug, title, narrative, composed_img, pack_price, pack_items(qty, product:products(outlet_price))')
       .eq('status', 'published')
       .order('created_at', { ascending: false })
       .limit(6),
+    supabase
+      .from('categories')
+      .select('id, slug, name, universe, parent_id')
+      .order('slug', { ascending: true }),
   ]);
+
+  // Meilleure remise du catalogue → mise en avant hero
+  const topDeal = (products ?? [])
+    .map((p) => ({ p, pct: discountPct(p.market_price, p.outlet_price) ?? 0 }))
+    .sort((a, b) => b.pct - a.pct)[0];
+  // Catégories racines (univers) pour le bandeau dense
+  const rootCategories = (categories ?? []).filter((c) => !c.parent_id);
+  const catById = new Map((categories ?? []).map((c) => [c.id, c]));
 
   return (
     <main className="min-h-dvh">
       {/* Header */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl border-b border-white/5" style={{ background: 'oklch(16% 0.015 260 / 0.8)' }}>
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="font-display font-extrabold text-2xl tracking-tight">
+      <header className="sticky top-0 z-40 backdrop-blur-xl border-b border-white/5" style={{ background: 'oklch(16% 0.015 260 / 0.85)' }}>
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+          <Link href="/" className="font-display font-extrabold text-2xl tracking-tight shrink-0">
             OUT<span className="text-app-accent">RUSH</span>
           </Link>
-          <nav className="flex items-center gap-6 text-sm">
+          <div className="hidden md:flex flex-1 max-w-md">
+            <div className="w-full flex items-center gap-2 rounded-full bg-app-surface-2 border border-white/8 px-4 py-2 text-sm text-app-muted">
+              <span>🔍</span>
+              <span>Cherchez une marque, un produit…</span>
+            </div>
+          </div>
+          <nav className="flex items-center gap-5 text-sm shrink-0">
             <Link href="/flash" className="hover:text-app-accent transition-colors duration-120">Flash</Link>
-            <Link href="/login" className="hover:text-app-accent transition-colors duration-120">Compte</Link>
+            <Link href="/login" className="rounded-full px-4 py-1.5 border border-white/10 hover:border-app-accent hover:text-app-accent transition-colors duration-120">Compte</Link>
           </nav>
         </div>
+        {rootCategories.length ? (
+          <div className="border-t border-white/5">
+            <div className="max-w-7xl mx-auto px-4 flex gap-1 overflow-x-auto py-2 text-sm">
+              {rootCategories.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/category/${c.slug}`}
+                  className="px-3 py-1.5 rounded-full whitespace-nowrap text-app-muted hover:text-app-text hover:bg-app-surface transition-colors duration-120"
+                >
+                  {localized(c.name, locale)}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </header>
+
+      {/* HERO éditorial — meilleure affaire du moment */}
+      {topDeal?.p ? (
+        <section className="relative overflow-hidden border-b border-white/5">
+          <div
+            className="absolute inset-0 opacity-60"
+            style={{ background: 'radial-gradient(ellipse at 30% 0%, oklch(62% 0.24 25 / 0.18), transparent 55%)' }}
+          />
+          <div className="relative max-w-7xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 gap-8 items-center">
+            <div className="space-y-5">
+              <p className="inline-flex items-center gap-2 text-app-accent uppercase tracking-[0.25em] text-xs font-bold">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-app-accent opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-app-accent" />
+                </span>
+                L'affaire du moment
+              </p>
+              <h1 className="font-display font-extrabold text-4xl md:text-5xl leading-[1.05]">
+                L'outlet mondial,{' '}
+                <span className="text-app-accent">chronométré.</span>
+              </h1>
+              <p className="text-app-muted max-w-md">
+                Invendus et fins de série de grandes marques — beauté, mode, tech, maison.
+                Prix réels vérifiés, remises scellées.
+              </p>
+              <div className="flex items-center gap-3 pt-2">
+                <Link
+                  href={`/product/${topDeal.p.slug}`}
+                  className="rounded-xl px-6 py-3 font-display font-bold bg-app-accent text-white transition-transform duration-[220ms] hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Voir l'affaire {topDeal.pct ? `· −${topDeal.pct}%` : ''}
+                </Link>
+                <Link href="/flash" className="rounded-xl px-6 py-3 border border-white/10 hover:bg-app-surface transition-colors duration-120">
+                  Les ventes flash
+                </Link>
+              </div>
+            </div>
+            <Link href={`/product/${topDeal.p.slug}`} className="block group">
+              <div className="card-hunt overflow-hidden aspect-[4/3]">
+                {(topDeal.p.images ?? [])[0] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-media/${topDeal.p.images[0]}`}
+                    alt={localized(topDeal.p.title, locale)}
+                    className="w-full h-full object-cover transition-transform duration-[600ms] group-hover:scale-[1.03]"
+                  />
+                ) : (
+                  <div className="w-full h-full grid place-items-center font-display text-7xl text-app-accent opacity-30">O</div>
+                )}
+              </div>
+            </Link>
+          </div>
+        </section>
+      ) : null}
+
+      {/* Bandeau CATÉGORIES dense */}
+      {rootCategories.length ? (
+        <section className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {rootCategories.map((c, i) => (
+              <Link
+                key={c.id}
+                href={`/category/${c.slug}`}
+                className="card-hunt rise-in p-4 text-center hover:ring-1 hover:ring-[color:var(--app-accent)]/40 transition-all duration-[220ms]"
+                style={{ animationDelay: `${i * 40}ms` }}
+              >
+                <div className="font-display font-bold text-lg">{localized(c.name, locale)}</div>
+                <div className="text-xs text-app-muted mt-1 capitalize">{c.universe}</div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {/* BEST-SELLERS — rail dense horizontal */}
+      {bestSellers?.length ? (
+        <section className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex items-baseline justify-between mb-4">
+            <h2 className="font-display font-bold text-2xl">Les plus chassés</h2>
+            <span className="text-sm text-app-muted">tendances en ce moment</span>
+          </div>
+          <div className="flex gap-4 overflow-x-auto pb-3 snap-x">
+            {bestSellers.map((p, i) => (
+              <div key={p.id} className="snap-start shrink-0 w-40 sm:w-44">
+                <ProductCard product={p} locale={locale} index={i} />
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {/* Rail FLASH */}
       {flash ? (
@@ -137,7 +266,7 @@ export default async function HomePage() {
       ) : null}
 
       <section className="max-w-7xl mx-auto px-4 py-10">
-        <h2 className="font-display font-bold text-3xl mb-2">La chasse est ouverte</h2>
+        <h2 className="font-display font-bold text-3xl mb-2">Tout le catalogue</h2>
         <p className="text-app-muted mb-8">Prix réels vérifiés multi-sources. Remises scellées, pas promises.</p>
         {products?.length ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -149,6 +278,9 @@ export default async function HomePage() {
           <div className="card-hunt p-16 text-center space-y-3">
             <div className="font-display text-6xl text-app-accent opacity-40 select-none">⏱</div>
             <p className="text-app-muted">{t(locale, 'hunt_empty')}</p>
+            <p className="text-sm text-app-muted">
+              Côté admin ? <Link href="/admin/products/new" className="text-app-accent">Ajoutez le premier produit</Link>.
+            </p>
           </div>
         )}
       </section>
