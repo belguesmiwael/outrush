@@ -151,7 +151,16 @@ export default function ScanPage() {
     }
   }
 
-  // ── Mode PHOTO → IA (produits sans code-barres) ──
+  // ── Fiche photo reçue du téléphone (créée côté serveur, en cours d'identification) ──
+  const onRemotePhoto = useCallback((scanId) => {
+    const localId = `remote-photo-${scanId}`;
+    setQueue((q) => {
+      if (q.some((item) => item.id === scanId)) return q;
+      return [{ localId, code: '📷 Photo du téléphone', codeType: 'photo', status: 'enriching', id: scanId }, ...q].slice(0, 40);
+    });
+    if (navigator.vibrate) navigator.vibrate(30);
+  }, []);
+
   async function onPhotoPicked(e) {
     const files = [...(e.target.files ?? [])];
     e.target.value = '';
@@ -282,7 +291,7 @@ export default function ScanPage() {
         </div>
 
         {/* Relais téléphone → PC */}
-        <MobileRelayPanel onRemoteScan={enqueue} />
+        <MobileRelayPanel onRemoteScan={enqueue} onRemotePhoto={onRemotePhoto} />
         {queue.length === 0 ? (
           <p className="text-app-muted text-sm">Aucun scan — le viseur attend sa première cible.</p>
         ) : (

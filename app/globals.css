@@ -156,3 +156,6 @@ h1, h2, h3, .display { font-family: var(--app-font-display), var(--app-font-body
 
 /* RTL */
 [dir="rtl"] .seal { letter-spacing: 0; }
+
+/* Marge de sécurité bas d'écran (encoches mobiles) */
+.safe-bottom { padding-bottom: calc(1rem + env(safe-area-inset-bottom)); }

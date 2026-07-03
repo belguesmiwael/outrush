@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { enrichPhotoScan } from '@/lib/scan/enrich-photo';
 
+export const maxDuration = 60; // la recherche web IA peut prendre du temps
+
 const MAX_BYTES = 6 * 1024 * 1024;
 const TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
