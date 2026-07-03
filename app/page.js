@@ -310,6 +310,26 @@ export default async function HomePage() {
         </section>
       ) : null}
 
+      {/* Bannière SURPRISE BOX */}
+      <section className="max-w-7xl mx-auto px-4 pt-10">
+        <Link
+          href="/surprise-box"
+          className="card-hunt block p-8 md:p-10 text-center relative overflow-hidden group"
+        >
+          <div className="absolute inset-0 opacity-70" style={{ background: 'radial-gradient(ellipse at 50% 0%, oklch(62% 0.24 25 / 0.15), transparent 60%)' }} />
+          <div className="relative space-y-3">
+            <div className="text-4xl">🎁</div>
+            <h2 className="font-display font-extrabold text-2xl md:text-3xl">Surprise Box</h2>
+            <p className="text-app-muted max-w-md mx-auto">
+              Choisissez un budget, l'IA compose une box mystère d'une valeur toujours supérieure.
+            </p>
+            <span className="inline-block mt-2 text-app-accent font-medium group-hover:translate-x-1 transition-transform duration-220">
+              Composer ma box →
+            </span>
+          </div>
+        </Link>
+      </section>
+
       <section className="max-w-7xl mx-auto px-4 py-10">
         <h2 className="font-display font-bold text-3xl mb-2">Tout le catalogue</h2>
         <p className="text-app-muted mb-8">Prix réels vérifiés multi-sources. Remises scellées, pas promises.</p>

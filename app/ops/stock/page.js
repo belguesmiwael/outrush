@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { createPackFromSuggestion, dismissSuggestion } from '@/lib/actions/packs';
+import { createPackFromSuggestion, dismissSuggestion, generatePacksBulk } from '@/lib/actions/packs';
 import { localized } from '@/lib/i18n/dictionaries';
 import { formatPrice } from '@/lib/utils';
 
@@ -99,10 +99,27 @@ export default async function StockPage() {
 
       {/* Dormants + suggestions de packs */}
       <section className="space-y-4">
-        <h2 className="font-display font-bold text-xl">
-          Dormants à réveiller{' '}
-          <span className="text-app-accent">({byClass.dormant.length})</span>
-        </h2>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <h2 className="font-display font-bold text-xl">
+            Dormants à réveiller{' '}
+            <span className="text-app-accent">({byClass.dormant.length})</span>
+          </h2>
+          {(suggestions ?? []).length ? (
+            <form action={generatePacksBulk} className="flex items-center gap-2">
+              <input
+                type="number"
+                name="count"
+                min="1"
+                max="100"
+                defaultValue={Math.min(40, byDormant.size)}
+                className="w-20 rounded-lg bg-app-surface-2 border border-white/8 px-3 py-2 text-sm text-app-text"
+              />
+              <button className="rounded-lg px-4 py-2 font-display font-bold text-sm bg-app-accent text-white transition-transform duration-120 hover:scale-[1.02] active:scale-95">
+                ⚡ Générer en masse
+              </button>
+            </form>
+          ) : null}
+        </div>
 
         {byClass.dormant.length === 0 ? (
           <div className="card-hunt p-10 text-center text-app-muted">
