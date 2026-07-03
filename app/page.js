@@ -2,7 +2,9 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { localized, t } from '@/lib/i18n/dictionaries';
 import { formatPrice, discountPct } from '@/lib/utils';
+import { pickDailyRush, secondsUntilRotation } from '@/lib/rush/daily';
 import Countdown from '@/components/shop/Countdown';
+import RotationTimer from '@/components/shop/RotationTimer';
 import LiveStockGauge from '@/components/shop/LiveStockGauge';
 import ProductCard from '@/components/shop/ProductCard';
 import PriceReveal from '@/components/shop/PriceReveal';
@@ -25,7 +27,7 @@ export default async function HomePage() {
       .maybeSingle(),
     supabase
       .from('products')
-      .select('id, slug, title, brand, images, market_price, outlet_price, currency, category_id')
+      .select('id, slug, title, brand, images, market_price, outlet_price, currency, category_id, quantity')
       .eq('status', 'published')
       .order('created_at', { ascending: false })
       .limit(60),
@@ -51,6 +53,12 @@ export default async function HomePage() {
   const topDeal = (products ?? [])
     .map((p) => ({ p, pct: discountPct(p.market_price, p.outlet_price) ?? 0 }))
     .sort((a, b) => b.pct - a.pct)[0];
+  // Le Rush du jour : sélection déterministe qui tourne chaque nuit
+  const dailyRush = pickDailyRush(
+    (products ?? []).filter((p) => (p.quantity ?? 1) > 0),
+    8
+  );
+  const rotationSeconds = secondsUntilRotation();
   // Catégories racines (univers) pour le bandeau dense
   const rootCategories = (categories ?? []).filter((c) => !c.parent_id);
   const catById = new Map((categories ?? []).map((c) => [c.id, c]));
@@ -70,6 +78,7 @@ export default async function HomePage() {
             </div>
           </div>
           <nav className="flex items-center gap-5 text-sm shrink-0">
+            <Link href="/rush" className="hover:text-app-accent transition-colors duration-120">Le Flux</Link>
             <Link href="/flash" className="hover:text-app-accent transition-colors duration-120">Flash</Link>
             <Link href="/login" className="rounded-full px-4 py-1.5 border border-white/10 hover:border-app-accent hover:text-app-accent transition-colors duration-120">Compte</Link>
           </nav>
@@ -140,6 +149,42 @@ export default async function HomePage() {
                   <div className="w-full h-full grid place-items-center font-display text-7xl text-app-accent opacity-30">O</div>
                 )}
               </div>
+            </Link>
+          </div>
+        </section>
+      ) : null}
+
+      {/* DAILY RUSH — le flux qui disparaît */}
+      {dailyRush.length ? (
+        <section className="max-w-7xl mx-auto px-4 pt-10">
+          <div className="flex items-center justify-between gap-4 flex-wrap mb-5">
+            <div>
+              <h2 className="font-display font-extrabold text-2xl md:text-3xl flex items-center gap-3">
+                Daily Rush
+                <span className="text-[10px] uppercase tracking-[0.3em] text-app-accent border border-app-accent/40 rounded-full px-2 py-1">
+                  aujourd'hui
+                </span>
+              </h2>
+              <p className="text-app-muted text-sm mt-1">
+                Une sélection qui change chaque jour. Ces pièces partent, d'autres arrivent.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-app-muted">Renouvellement dans</span>
+              <RotationTimer initialSeconds={rotationSeconds} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {dailyRush.map((p, i) => (
+              <ProductCard key={p.id} product={p} locale={locale} index={i} />
+            ))}
+          </div>
+          <div className="mt-6 text-center">
+            <Link
+              href="/rush"
+              className="inline-flex items-center gap-2 rounded-full px-6 py-3 font-display font-bold bg-app-surface border border-white/10 hover:border-app-accent hover:text-app-accent transition-colors duration-120"
+            >
+              ▶ Entrer dans le Flux — mode plein écran
             </Link>
           </div>
         </section>

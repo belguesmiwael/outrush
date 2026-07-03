@@ -159,3 +159,11 @@ h1, h2, h3, .display { font-family: var(--app-font-display), var(--app-font-body
 
 /* Marge de sécurité bas d'écran (encoches mobiles) */
 .safe-bottom { padding-bottom: calc(1rem + env(safe-area-inset-bottom)); }
+
+/* Pulsation "Dernière pièce" — urgence incandescente */
+@keyframes pulseLast {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(62% 0.24 25 / 0.5); }
+  50%      { box-shadow: 0 0 0 6px oklch(62% 0.24 25 / 0); }
+}
+.pulse-last { animation: pulseLast 1.6s cubic-bezier(0.16,1,0.3,1) infinite; }
+@media (prefers-reduced-motion: reduce) { .pulse-last { animation: none; } }
