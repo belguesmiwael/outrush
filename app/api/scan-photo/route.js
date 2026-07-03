@@ -1,4 +1,4 @@
-import { NextResponse, after } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { enrichPhotoScan } from '@/lib/scan/enrich-photo';
@@ -72,16 +72,22 @@ export async function POST(request) {
       .update({ status: 'enriching', enrichment: { capture_path: capturePath, method: 'photo' } })
       .eq('id', scan.id);
 
-    // Identification vision après la réponse — la rafale n'attend pas
-    after(async () => {
-      try {
-        await enrichPhotoScan(scan.id);
-      } catch (err) {
-        console.error('enrichPhotoScan failed', { scanId: scan.id, message: err?.message });
-      }
-    });
+    // Identification vision DANS la requête (after() pas fiable en serverless)
+    let finalStatus = 'enriching';
+    try {
+      await enrichPhotoScan(scan.id);
+      const { data: refreshed } = await admin
+        .from('scan_events')
+        .select('status')
+        .eq('id', scan.id)
+        .single();
+      finalStatus = refreshed?.status ?? 'ready';
+    } catch (err) {
+      console.error('enrichPhotoScan failed', { scanId: scan.id, message: err?.message });
+      finalStatus = 'not_found';
+    }
 
-    return NextResponse.json({ id: scan.id, status: 'enriching' }, { status: 202 });
+    return NextResponse.json({ id: scan.id, status: finalStatus }, { status: 200 });
   } catch (err) {
     console.error('scan-photo route error', { message: err?.message });
     return NextResponse.json({ error: 'internal' }, { status: 500 });

@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { after } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { enrichScan } from '@/lib/scan/enrich';
+
+export const maxDuration = 60;
 
 const ScanSchema = z.object({
   code: z.string().regex(/^[\dA-Za-z\-_:./]{4,128}$/),
@@ -60,16 +61,22 @@ export async function POST(request) {
       return NextResponse.json({ error: 'insert_failed' }, { status: 500 });
     }
 
-    // Enrichissement après la réponse — la rafale n'attend jamais
-    after(async () => {
-      try {
-        await enrichScan(scan.id);
-      } catch (err) {
-        console.error('enrichScan failed', { scanId: scan.id, message: err?.message });
-      }
-    });
+    // Enrichissement DANS la requête (after() n'est pas fiable en serverless)
+    let finalStatus = 'enriching';
+    try {
+      await enrichScan(scan.id);
+      const { data: refreshed } = await supabase
+        .from('scan_events')
+        .select('status')
+        .eq('id', scan.id)
+        .single();
+      finalStatus = refreshed?.status ?? 'ready';
+    } catch (err) {
+      console.error('enrichScan failed', { scanId: scan.id, message: err?.message });
+      finalStatus = 'not_found';
+    }
 
-    return NextResponse.json({ id: scan.id, status: 'enriching' }, { status: 202 });
+    return NextResponse.json({ id: scan.id, status: finalStatus }, { status: 200 });
   } catch (err) {
     console.error('scan route error', { message: err?.message });
     return NextResponse.json({ error: 'internal' }, { status: 500 });

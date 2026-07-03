@@ -3,6 +3,7 @@ import { publishScannedProduct, incrementDuplicate } from '@/lib/actions/scan';
 import { approveSupplierProduct, rejectSupplierProduct } from '@/lib/actions/supplier';
 import { localized } from '@/lib/i18n/dictionaries';
 import { formatPrice } from '@/lib/utils';
+import RecoverScansButton from '@/components/ops/RecoverScansButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,9 +36,7 @@ export default async function ScanQueuePage() {
         <p className="text-app-muted mt-1">Rien n'est publié sans votre validation. 1 tap = en ligne.</p>
       </div>
 
-      {pending.length ? (
-        <p className="text-sm text-app-accent">⏱ {pending.length} scan(s) en cours d'enquête — rafraîchissez dans quelques secondes.</p>
-      ) : null}
+      {pending.length ? <RecoverScansButton count={pending.length} /> : null}
 
       <section className="space-y-4">
         <h2 className="font-display font-bold text-xl">Prêtes à publier ({ready.length})</h2>
