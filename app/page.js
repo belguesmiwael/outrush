@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { localized, t } from '@/lib/i18n/dictionaries';
+import { formatPrice } from '@/lib/utils';
 import Countdown from '@/components/shop/Countdown';
 import LiveStockGauge from '@/components/shop/LiveStockGauge';
 import ProductCard from '@/components/shop/ProductCard';
@@ -13,7 +14,7 @@ export default async function HomePage() {
   const supabase = await createClient();
   const serverNow = new Date().toISOString();
 
-  const [{ data: flash }, { data: products }] = await Promise.all([
+  const [{ data: flash }, { data: products }, { data: packs }] = await Promise.all([
     supabase
       .from('flash_sales')
       .select('id, title, ends_at, flash_sale_items(id, flash_price, allocated_qty, remaining_qty, product:products(slug, title, brand, images, market_price, outlet_price, currency))')
@@ -28,6 +29,12 @@ export default async function HomePage() {
       .eq('status', 'published')
       .order('created_at', { ascending: false })
       .limit(24),
+    supabase
+      .from('packs')
+      .select('id, slug, title, narrative, composed_img, pack_price, pack_items(qty, product:products(outlet_price))')
+      .eq('status', 'published')
+      .order('created_at', { ascending: false })
+      .limit(6),
   ]);
 
   return (
@@ -92,6 +99,43 @@ export default async function HomePage() {
       ) : null}
 
       {/* Mur Card-Gallery */}
+      {/* Rail PACKS — les mariages du laboratoire */}
+      {packs?.length ? (
+        <section className="max-w-7xl mx-auto px-4 pt-10">
+          <h2 className="font-display font-bold text-3xl mb-2">Packs du laboratoire</h2>
+          <p className="text-app-muted mb-6">Des pièces mariées pour aller ensemble — moins cher qu'à l'unité.</p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {packs.map((pk, i) => {
+              const sumOutlet = (pk.pack_items ?? []).reduce(
+                (s, it) => s + Number(it.product?.outlet_price ?? 0) * it.qty, 0);
+              const pct = sumOutlet > 0
+                ? Math.round(((sumOutlet - Number(pk.pack_price)) / sumOutlet) * 100)
+                : 0;
+              const img = pk.composed_img
+                ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-media/${pk.composed_img}`
+                : null;
+              return (
+                <Link key={pk.id} href={`/pack/${pk.slug}`}
+                  className="card-hunt rise-in overflow-hidden group"
+                  style={{ animationDelay: `${i * 60}ms` }}>
+                  <div className="aspect-[3/2] bg-app-surface-2 relative overflow-hidden">
+                    {img ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={img} alt="" className="w-full h-full object-cover transition-transform duration-[600ms] group-hover:scale-[1.03]" />
+                    ) : null}
+                    {pct > 0 ? <span className="seal absolute top-3 left-3">PACK −{pct}%</span> : null}
+                  </div>
+                  <div className="p-4">
+                    <p className="font-medium leading-snug line-clamp-1">{localized(pk.title, locale)}</p>
+                    <p className="text-app-accent font-display font-bold mt-1">{formatPrice(pk.pack_price, 'USD', locale)}</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
       <section className="max-w-7xl mx-auto px-4 py-10">
         <h2 className="font-display font-bold text-3xl mb-2">La chasse est ouverte</h2>
         <p className="text-app-muted mb-8">Prix réels vérifiés multi-sources. Remises scellées, pas promises.</p>

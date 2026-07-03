@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { publishScannedProduct, incrementDuplicate } from '@/lib/actions/scan';
+import { approveSupplierProduct, rejectSupplierProduct } from '@/lib/actions/supplier';
 import { localized } from '@/lib/i18n/dictionaries';
 import { formatPrice } from '@/lib/utils';
 
@@ -7,12 +8,20 @@ export const dynamic = 'force-dynamic';
 
 export default async function ScanQueuePage() {
   const supabase = await createClient();
-  const { data: scans } = await supabase
-    .from('scan_events')
-    .select('id, code, status, enrichment, created_at, product:products(id, title, brand, market_price, outlet_price, currency, images, condition)')
-    .in('status', ['ready', 'duplicate', 'not_found', 'enriching', 'queued'])
-    .order('created_at', { ascending: false })
-    .limit(60);
+  const [{ data: scans }, { data: supplierPending }] = await Promise.all([
+    supabase
+      .from('scan_events')
+      .select('id, code, status, enrichment, created_at, product:products(id, title, brand, market_price, outlet_price, currency, images, condition)')
+      .in('status', ['ready', 'duplicate', 'not_found', 'enriching', 'queued'])
+      .order('created_at', { ascending: false })
+      .limit(60),
+    supabase
+      .from('products')
+      .select('id, title, brand, outlet_price, currency, condition, specs, lot:supplier_lots(name)')
+      .eq('status', 'pending_review')
+      .order('created_at', { ascending: true })
+      .limit(60),
+  ]);
 
   const ready = (scans ?? []).filter((s) => s.status === 'ready' && s.product);
   const duplicates = (scans ?? []).filter((s) => s.status === 'duplicate');
@@ -121,9 +130,73 @@ export default async function ScanQueuePage() {
           <h2 className="font-display font-bold text-xl">Introuvables ({notFound.length})</h2>
           <div className="space-y-2">
             {notFound.map((scan) => (
-              <div key={scan.id} className="card-hunt px-4 py-3 flex items-center justify-between text-sm">
+              <a
+                key={scan.id}
+                href={`/ops/scan/manual/${scan.id}`}
+                className="card-hunt px-4 py-3 flex items-center justify-between text-sm hover:ring-1 hover:ring-[color:var(--app-accent)]/40 transition-all duration-[220ms]"
+              >
                 <span className="font-mono">{scan.code}</span>
-                <span className="text-app-muted">Fiche manuelle assistée — Jalon 2</span>
+                <span className="text-app-accent font-medium">Créer la fiche assistée →</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {(supplierPending ?? []).length ? (
+        <section className="space-y-4">
+          <h2 className="font-display font-bold text-xl">
+            Lots fournisseurs à valider ({supplierPending.length})
+          </h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            {supplierPending.map((p) => (
+              <div key={p.id} className="card-hunt p-4 space-y-3">
+                <div className="min-w-0">
+                  {p.brand ? (
+                    <p className="text-xs uppercase tracking-widest text-app-muted">{p.brand}</p>
+                  ) : null}
+                  <p className="font-medium leading-snug line-clamp-2">{localized(p.title, 'fr')}</p>
+                  <p className="text-xs text-app-muted mt-1">
+                    Lot « {p.lot?.name ?? '—'} » · {p.specs?.supplier_declared_qty ?? '?'} u. déclarées ·
+                    demande {formatPrice(p.specs?.supplier_asking_price ?? p.outlet_price, p.currency)} ·{' '}
+                    {p.condition}
+                  </p>
+                </div>
+                <form action={approveSupplierProduct} className="flex items-end gap-2">
+                  <input type="hidden" name="productId" value={p.id} />
+                  <label className="flex-1 text-xs text-app-muted space-y-1">
+                    Prix outlet
+                    <input
+                      name="outletPrice"
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      required
+                      defaultValue={p.outlet_price}
+                      className="w-full rounded-lg bg-app-surface-2 border border-white/8 px-2 py-2 text-sm text-app-text"
+                    />
+                  </label>
+                  <label className="w-24 text-xs text-app-muted space-y-1">
+                    Quantité
+                    <input
+                      name="quantity"
+                      type="number"
+                      min="1"
+                      required
+                      defaultValue={p.specs?.supplier_declared_qty ?? 1}
+                      className="w-full rounded-lg bg-app-surface-2 border border-white/8 px-2 py-2 text-sm text-app-text"
+                    />
+                  </label>
+                  <button className="rounded-lg px-4 py-2 text-sm font-display font-bold bg-app-accent text-white transition-transform duration-120 hover:scale-[1.02] active:scale-95">
+                    Publier
+                  </button>
+                </form>
+                <form action={rejectSupplierProduct}>
+                  <input type="hidden" name="productId" value={p.id} />
+                  <button className="text-xs text-app-muted hover:text-app-accent transition-colors duration-120">
+                    Écarter ce produit
+                  </button>
+                </form>
               </div>
             ))}
           </div>

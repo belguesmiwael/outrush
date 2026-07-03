@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { generatePackSuggestions, updatePackPerformance } from '@/lib/packs/engine';
 
 export const maxDuration = 60;
 
@@ -59,5 +60,15 @@ export async function GET(request) {
     if (!error) updated++;
   }
 
-  return NextResponse.json({ ok: true, updated });
+  // 2) Boucle d'apprentissage : performance des packs récents → pondérations
+  const perf = await updatePackPerformance(admin);
+  // 3) Moteur de packs : top-3 suggestions par dormant
+  const packs = await generatePackSuggestions(admin);
+
+  return NextResponse.json({
+    ok: true,
+    classified: updated,
+    pack_performance_updated: perf.updated,
+    pack_suggestions: packs.suggested,
+  });
 }
