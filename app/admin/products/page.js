@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { setProductStatus, deleteProduct } from '@/lib/actions/admin-products';
+import { setProductStatus, deleteProduct, applyPhotoStudio } from '@/lib/actions/admin-products';
 import { localized } from '@/lib/i18n/dictionaries';
 import { formatPrice, discountPct } from '@/lib/utils';
 
@@ -127,6 +127,17 @@ export default async function AdminProductsPage({ searchParams }) {
                   >
                     Éditer
                   </Link>
+                  {(p.images ?? []).length ? (
+                    <form action={applyPhotoStudio}>
+                      <input type="hidden" name="productId" value={p.id} />
+                      <button
+                        className="text-xs px-2.5 py-1.5 rounded-lg text-app-accent border border-app-accent/30 hover:bg-[color:var(--app-accent)]/10 transition-colors duration-120"
+                        title="Studio photo : détourage + mise en scène pro"
+                      >
+                        ✨ Studio
+                      </button>
+                    </form>
+                  ) : null}
                   <form action={deleteProduct}>
                     <input type="hidden" name="productId" value={p.id} />
                     <button className="text-xs px-2 py-1.5 rounded-lg text-app-muted hover:text-app-accent transition-colors duration-120" title="Supprimer / archiver">
