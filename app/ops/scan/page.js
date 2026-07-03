@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import MobileRelayPanel from '@/components/ops/MobileRelayPanel';
 
 const GTIN_RE = /^\d{8,14}$/;
 const COOLDOWN_MS = 2500; // anti double-lecture du même code
@@ -239,6 +240,9 @@ export default function ScanPage() {
             Valider les fiches →
           </Link>
         </div>
+
+        {/* Relais téléphone → PC */}
+        <MobileRelayPanel onRemoteScan={enqueue} />
         {queue.length === 0 ? (
           <p className="text-app-muted text-sm">Aucun scan — le viseur attend sa première cible.</p>
         ) : (
