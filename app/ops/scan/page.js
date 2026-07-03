@@ -151,6 +151,34 @@ export default function ScanPage() {
     }
   }
 
+  // ── Mode PHOTO → IA (produits sans code-barres) ──
+  async function onPhotoPicked(e) {
+    const files = [...(e.target.files ?? [])];
+    e.target.value = '';
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) continue;
+      const localId = `photo-${file.name}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      setQueue((q) => [{ localId, code: '📷 photo…', codeType: 'photo', status: 'enriching' }, ...q].slice(0, 40));
+      if (navigator.vibrate) navigator.vibrate(40);
+      try {
+        const fd = new FormData();
+        fd.set('photo', file);
+        const res = await fetch('/api/scan-photo', { method: 'POST', body: fd });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(json.error || 'photo_failed');
+        setQueue((q) =>
+          q.map((item) =>
+            item.localId === localId
+              ? { ...item, code: 'Produit identifié', status: json.status ?? 'enriching', id: json.id }
+              : item
+          )
+        );
+      } catch {
+        setQueue((q) => q.map((item) => (item.localId === localId ? { ...item, status: 'error' } : item)));
+      }
+    }
+  }
+
   async function toggleTorch() {
     const track = streamRef.current?.getVideoTracks()[0];
     if (!track) return;
@@ -171,7 +199,6 @@ export default function ScanPage() {
     not_found: { label: 'Introuvable', cls: '' },
     error: { label: 'Erreur réseau', cls: '' },
   };
-
   return (
     <main className="relative min-h-dvh flex flex-col">
       {/* Douchette HID */}
@@ -230,6 +257,19 @@ export default function ScanPage() {
             {torch.on ? '🔦 Torche ON' : '🔦 Torche'}
           </button>
         ) : null}
+
+        {/* Bouton PHOTO → IA (produits sans code-barres) */}
+        <label className="absolute bottom-4 left-1/2 -translate-x-1/2 cursor-pointer px-5 py-3 rounded-full font-display font-bold text-sm bg-app-accent text-white shadow-lg transition-transform duration-120 active:scale-95 hover:scale-[1.03]">
+          📷 Photographier (sans code-barres)
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            multiple
+            className="hidden"
+            onChange={onPhotoPicked}
+          />
+        </label>
       </div>
 
       {/* File de rafale */}
