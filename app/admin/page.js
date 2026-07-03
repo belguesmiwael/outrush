@@ -33,12 +33,20 @@ export default async function AdminDashboard() {
     <main className="p-6 md:p-10 space-y-8">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <h1 className="font-display font-bold text-3xl">Tableau de bord</h1>
-        <Link
-          href="/admin/products/new"
-          className="rounded-lg px-4 py-2.5 font-display font-bold text-sm bg-app-accent text-white transition-transform duration-120 hover:scale-[1.02] active:scale-95"
-        >
-          + Nouveau produit
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href="/ops/scan"
+            className="rounded-lg px-4 py-2.5 font-display font-bold text-sm border border-white/10 hover:border-app-accent hover:text-app-accent transition-colors duration-120"
+          >
+            📷 Scanner
+          </Link>
+          <Link
+            href="/admin/products/new"
+            className="rounded-lg px-4 py-2.5 font-display font-bold text-sm bg-app-accent text-white transition-transform duration-120 hover:scale-[1.02] active:scale-95"
+          >
+            + Nouveau produit
+          </Link>
+        </div>
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
