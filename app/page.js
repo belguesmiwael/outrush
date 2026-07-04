@@ -76,7 +76,12 @@ export default async function HomePage() {
     <main className="min-h-dvh">
       <SiteHeader categories={rootCategories} locale={locale} />
 
-      <Hero product={topDeal?.p ?? null} pct={topDeal?.pct ?? 0} locale={locale} />
+      <Hero
+        product={topDeal?.p ?? null}
+        pct={topDeal?.pct ?? 0}
+        products={(products ?? []).filter((p) => (p.images ?? []).length && p.market_price).slice(0, 20)}
+        locale={locale}
+      />
 
       {/* DAILY RUSH — le flux qui disparaît */}
       {dailyRush.length ? (
