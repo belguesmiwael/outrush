@@ -11,6 +11,7 @@ import PriceReveal from '@/components/shop/PriceReveal';
 import SiteHeader from '@/components/shop/SiteHeader';
 import SiteFooter from '@/components/shop/SiteFooter';
 import Hero from '@/components/shop/Hero';
+import CategoryGrid from '@/components/shop/CategoryGrid';
 import Reveal from '@/components/shop/Reveal';
 
 export const revalidate = 60;
@@ -46,10 +47,10 @@ export default async function HomePage() {
       .select('id, slug, title, narrative, composed_img, pack_price, pack_items(qty, product:products(outlet_price))')
       .eq('status', 'published')
       .order('created_at', { ascending: false })
-      .limit(6),
+      .limit(30),
     supabase
       .from('categories')
-      .select('id, slug, name, universe, parent_id')
+      .select('id, slug, name, universe, parent_id, icon')
       .order('slug', { ascending: true }),
   ]);
 
@@ -113,22 +114,17 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      {/* Bandeau CATÉGORIES dense */}
+      {/* CATÉGORIES — grille élégante à icônes */}
       {rootCategories.length ? (
-        <section className="max-w-7xl mx-auto px-4 py-8">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {rootCategories.map((c, i) => (
-              <Link
-                key={c.id}
-                href={`/category/${c.slug}`}
-                className="card-hunt rise-in p-4 text-center hover:ring-1 hover:ring-[color:var(--app-accent)]/40 transition-all duration-[220ms]"
-                style={{ animationDelay: `${i * 40}ms` }}
-              >
-                <div className="font-display font-bold text-lg">{localized(c.name, locale)}</div>
-                <div className="text-xs text-app-muted mt-1 capitalize">{c.universe}</div>
-              </Link>
-            ))}
+        <section className="max-w-7xl mx-auto px-4 py-10">
+          <div className="flex items-end justify-between mb-5">
+            <div>
+              <h2 className="font-display font-extrabold text-2xl md:text-3xl">Explorez tout</h2>
+              <div className="rule-accent mt-2" />
+            </div>
+            <span className="text-sm text-app-muted">{rootCategories.length} univers</span>
           </div>
+          <CategoryGrid categories={rootCategories} locale={locale} />
         </section>
       ) : null}
 
