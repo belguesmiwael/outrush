@@ -28,7 +28,7 @@ export async function POST() {
     .in('status', ['enriching', 'queued'])
     .lt('created_at', oneMinAgo)
     .order('created_at', { ascending: true })
-    .limit(5);
+    .limit(1);
 
   if (!stuck?.length) return NextResponse.json({ recovered: 0 });
 
