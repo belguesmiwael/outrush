@@ -12,6 +12,7 @@ export default function ScanPage() {
   const workerRef = useRef(null);
   const streamRef = useRef(null);
   const lastLockRef = useRef({ code: null, at: 0 });
+  const sentCodesRef = useRef(new Set());
   const hidRef = useRef(null);
 
   const [camera, setCamera] = useState('starting'); // starting | live | denied | none
@@ -21,8 +22,11 @@ export default function ScanPage() {
 
   const enqueue = useCallback(async (code, codeType) => {
     const now = Date.now();
+    // Dédup permanente : un code déjà scanné cette session ne relance jamais l'IA
+    if (sentCodesRef.current.has(code)) return;
     if (lastLockRef.current.code === code && now - lastLockRef.current.at < COOLDOWN_MS) return;
     lastLockRef.current = { code, at: now };
+    sentCodesRef.current.add(code);
 
     // Feedback SCAN LOCK : pulse + vibration + bip
     setLocked(true);

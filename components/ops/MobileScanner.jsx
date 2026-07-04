@@ -6,9 +6,9 @@ import { pairScanSession } from '@/lib/actions/scan-session';
 
 export default function MobileScanner({ token }) {
   const channelRef = useRef(null);
+  const sentCodesRef = useRef(new Set()); // dédup permanente des codes envoyés
   const [status, setStatus] = useState('pairing'); // pairing | live | error
   const [errorMsg, setErrorMsg] = useState(null);
-  const [mode, setMode] = useState('barcode'); // barcode | photo
   const [sent, setSent] = useState([]);
   const [snapshot, setSnapshot] = useState(null); // {dataUrl, blob} en attente de confirmation
   const [sending, setSending] = useState(false);
@@ -53,16 +53,17 @@ export default function MobileScanner({ token }) {
     };
   }, [token]);
 
-  // Code-barres → broadcast au PC (inchangé)
+  // Code-barres/QR détecté en continu → broadcast au PC (dédup permanente)
   const onCode = useCallback(
     (code, codeType) => {
-      if (mode !== 'barcode') return; // en mode photo, on ignore les codes
       const ch = channelRef.current;
       if (!ch) return;
+      if (sentCodesRef.current.has(code)) return;
+      sentCodesRef.current.add(code);
       ch.send({ type: 'broadcast', event: 'scan', payload: { code, codeType } });
       setSent((prev) => [{ label: code, at: Date.now(), kind: 'code' }, ...prev].slice(0, 8));
     },
-    [mode]
+    []
   );
 
   const { videoRef, canvasRef, camera, torch, locked, toggleTorch } = useBarcodeScanner(onCode);
@@ -163,20 +164,16 @@ export default function MobileScanner({ token }) {
         <video ref={videoRef} playsInline muted className="absolute inset-0 w-full h-full object-cover" />
         <canvas ref={canvasRef} className="hidden" />
 
-        {/* Cadre : cible code-barres OU cadre photo */}
+        {/* Cadre cible unique — détecte les codes en continu */}
         <div className="absolute inset-0 grid place-items-center pointer-events-none">
           <div
-            className={`${mode === 'photo' ? 'w-[85%] aspect-square' : 'w-[75%] max-w-sm aspect-[3/2]'} rounded-2xl border-2 transition-all duration-220 ${
-              locked && mode === 'barcode' ? 'scan-lock border-app-accent' : 'border-white/40'
+            className={`w-[80%] max-w-sm aspect-square rounded-2xl border-2 transition-all duration-220 ${
+              locked ? 'scan-lock border-app-accent' : 'border-white/40'
             }`}
             style={{ boxShadow: '0 0 0 9999px oklch(0% 0 0 / 0.45)' }}
           >
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] tracking-[0.35em] uppercase bg-black/60 px-3 py-1 rounded-full text-white/80">
-              {mode === 'photo'
-                ? 'Cadrez le produit'
-                : locked
-                  ? 'Verrouillé'
-                  : 'Visez le code-barres'}
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] tracking-[0.35em] uppercase bg-black/60 px-3 py-1 rounded-full text-white/80 whitespace-nowrap">
+              {locked ? '✓ Code détecté' : 'Code-barres auto · ou photo'}
             </span>
           </div>
         </div>
@@ -202,20 +199,21 @@ export default function MobileScanner({ token }) {
           ) : null}
         </div>
 
-        {/* Bouton capture (mode photo) */}
-        {mode === 'photo' ? (
-          <div className="absolute bottom-24 inset-x-0 grid place-items-center">
-            <button
-              onClick={capturePhoto}
-              disabled={camera !== 'live'}
-              className="w-18 h-18 rounded-full bg-white/95 ring-4 ring-white/30 disabled:opacity-40 transition-transform duration-120 active:scale-90 grid place-items-center"
-              style={{ width: 72, height: 72 }}
-              aria-label="Prendre la photo"
-            >
-              <span className="w-14 h-14 rounded-full bg-app-accent" style={{ width: 56, height: 56 }} />
-            </button>
-          </div>
-        ) : null}
+        {/* Bouton photo TOUJOURS visible (produits sans code-barres) */}
+        <div className="absolute bottom-6 inset-x-0 flex flex-col items-center gap-2">
+          <button
+            onClick={capturePhoto}
+            disabled={camera !== 'live'}
+            className="rounded-full bg-white/95 ring-4 ring-white/30 disabled:opacity-40 transition-transform duration-120 active:scale-90 grid place-items-center"
+            style={{ width: 72, height: 72 }}
+            aria-label="Prendre la photo du produit"
+          >
+            <span className="rounded-full bg-app-accent" style={{ width: 56, height: 56 }} />
+          </button>
+          <span className="text-[11px] text-white/70 bg-black/50 px-3 py-1 rounded-full">
+            📷 Photo produit (sans code-barres)
+          </span>
+        </div>
 
         {camera === 'denied' ? (
           <div className="absolute inset-0 grid place-items-center bg-black/80 p-6 text-center">
@@ -226,32 +224,12 @@ export default function MobileScanner({ token }) {
         ) : null}
       </div>
 
-      {/* Sélecteur de mode */}
-      <div className="bg-app-bg px-4 pt-3">
-        <div className="flex rounded-xl overflow-hidden border border-white/10">
-          {[
-            ['barcode', '▐▐▐ Code-barres'],
-            ['photo', '📷 Photo produit'],
-          ].map(([m, label]) => (
-            <button
-              key={m}
-              onClick={() => setMode(m)}
-              className={`flex-1 py-2.5 text-sm font-medium transition-colors duration-120 ${
-                mode === m ? 'bg-app-accent text-white' : 'text-app-muted'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Historique local */}
       <div className="bg-app-bg p-4 space-y-2 max-h-[22dvh] overflow-y-auto">
         <p className="text-xs uppercase tracking-widest text-app-muted">Envoyés au PC ({sent.length})</p>
         {sent.length === 0 ? (
           <p className="text-app-muted text-sm">
-            {mode === 'photo' ? 'Cadrez un produit et appuyez sur le bouton.' : 'Scannez un code-barres pour commencer.'}
+            Scannez un code-barres, ou photographiez un produit sans code.
           </p>
         ) : (
           sent.map((s) => (
