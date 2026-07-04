@@ -18,6 +18,7 @@ export default function ScanPage() {
   const [camera, setCamera] = useState('starting'); // starting | live | denied | none
   const [torch, setTorch] = useState({ available: false, on: false });
   const [locked, setLocked] = useState(false);
+  const [pendingCode, setPendingCode] = useState(null); // code verrouillé en attente de photo
   const [queue, setQueue] = useState([]); // {code, codeType, status, id?}
 
   const enqueue = useCallback(async (code, codeType) => {
@@ -26,7 +27,6 @@ export default function ScanPage() {
     if (sentCodesRef.current.has(code)) return;
     if (lastLockRef.current.code === code && now - lastLockRef.current.at < COOLDOWN_MS) return;
     lastLockRef.current = { code, at: now };
-    sentCodesRef.current.add(code);
 
     // Feedback SCAN LOCK : pulse + vibration + bip
     setLocked(true);
@@ -46,25 +46,8 @@ export default function ScanPage() {
       /* audio non bloquant */
     }
 
-    const localId = `${code}-${now}`;
-    setQueue((q) => [{ localId, code, codeType, status: 'queued' }, ...q].slice(0, 40));
-
-    try {
-      const res = await fetch('/api/scan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, code_type: codeType }),
-      });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error || 'scan_failed');
-      setQueue((q) =>
-        q.map((item) =>
-          item.localId === localId ? { ...item, status: json.status ?? 'enriching', id: json.id } : item
-        )
-      );
-    } catch {
-      setQueue((q) => q.map((item) => (item.localId === localId ? { ...item, status: 'error' } : item)));
-    }
+    // Le code est VERROUILLÉ : on attend la photo pour l'envoyer avec (identif. sûre).
+    setPendingCode({ code, codeType });
   }, []);
 
   // ── Caméra + boucle de décodage via Web Worker ──
@@ -165,6 +148,39 @@ export default function ScanPage() {
     if (navigator.vibrate) navigator.vibrate(30);
   }, []);
 
+  // Capture une frame de la webcam et l'envoie (avec le code verrouillé s'il y en a un)
+  async function captureAndSend() {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || camera !== 'live') return;
+    const w = video.videoWidth || 1280;
+    const h = video.videoHeight || 720;
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(video, 0, 0, w, h);
+    const blob = await new Promise((r) => canvas.toBlob(r, 'image/jpeg', 0.9));
+    if (!blob) return;
+
+    const joined = pendingCode?.code ?? null;
+    const localId = `cap-${Date.now()}`;
+    setLocked(true); setTimeout(() => setLocked(false), 500);
+    if (navigator.vibrate) navigator.vibrate(40);
+    setQueue((q) => [{ localId, code: joined ? `▐▐▐ ${joined} + photo` : '📷 photo', codeType: 'photo', status: 'enriching' }, ...q].slice(0, 40));
+    if (joined) sentCodesRef.current.add(joined);
+    setPendingCode(null);
+
+    try {
+      const fd = new FormData();
+      fd.set('photo', blob, 'capture.jpg');
+      if (joined) fd.set('code', joined);
+      const res = await fetch('/api/scan-photo', { method: 'POST', body: fd });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || 'photo_failed');
+      setQueue((q) => q.map((item) => item.localId === localId ? { ...item, code: 'Produit identifié', status: json.status ?? 'enriching', id: json.id } : item));
+    } catch {
+      setQueue((q) => q.map((item) => item.localId === localId ? { ...item, status: 'error' } : item));
+    }
+  }
+
   async function onPhotoPicked(e) {
     const files = [...(e.target.files ?? [])];
     e.target.value = '';
@@ -239,10 +255,19 @@ export default function ScanPage() {
             }}
           >
             <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] tracking-[0.35em] uppercase bg-black/60 px-3 py-1 rounded-full text-white/80">
-              {locked ? 'LOCK' : 'Visez le code-barres'}
+              {pendingCode ? 'CODE LU — PHOTOGRAPHIEZ' : locked ? 'LOCK' : 'Visez le code-barres'}
             </span>
           </div>
         </div>
+
+        {/* Bandeau code verrouillé */}
+        {pendingCode ? (
+          <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 glass rounded-full px-4 py-2 flex items-center gap-3 text-sm">
+            <span className="text-app-accent font-mono font-bold">▐▐▐ {pendingCode.code}</span>
+            <span className="text-white/70">→ cadrez et photographiez</span>
+            <button onClick={() => setPendingCode(null)} className="text-white/50 hover:text-white text-xs">✕</button>
+          </div>
+        ) : null}
 
         {camera !== 'live' ? (
           <div className="absolute inset-0 grid place-items-center bg-app-bg/90 p-8 text-center">
@@ -271,9 +296,25 @@ export default function ScanPage() {
           </button>
         ) : null}
 
-        {/* Bouton PHOTO → IA (produits sans code-barres) */}
-        <label className="absolute bottom-4 left-1/2 -translate-x-1/2 cursor-pointer px-5 py-3 rounded-full font-display font-bold text-sm bg-app-accent text-white shadow-lg transition-transform duration-120 active:scale-95 hover:scale-[1.03]">
-          📷 Photographier (sans code-barres)
+        {/* Bouton CAPTURE webcam → envoie code+photo (ou photo seule) */}
+        {camera === 'live' ? (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+            <button
+              onClick={captureAndSend}
+              className="w-16 h-16 rounded-full bg-white ring-4 ring-white/30 grid place-items-center transition-transform duration-120 active:scale-90 hover:scale-105"
+              aria-label="Capturer"
+            >
+              <span className="w-12 h-12 rounded-full bg-app-accent" />
+            </button>
+            <span className="text-[11px] text-white/80 bg-black/50 px-3 py-1 rounded-full">
+              {pendingCode ? '📸 Photographier (code inclus)' : '📸 Photographier le produit'}
+            </span>
+          </div>
+        ) : null}
+
+        {/* Import fichier (fallback sans webcam) */}
+        <label className="absolute bottom-4 right-4 cursor-pointer px-3 py-2 rounded-full font-medium text-xs bg-black/60 backdrop-blur border border-white/20 transition-transform duration-120 active:scale-95">
+          🖼 Importer
           <input
             type="file"
             accept="image/*"
