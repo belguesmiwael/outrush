@@ -241,6 +241,7 @@ export default function ScanPage() {
 
       {/* Viseur */}
       <div className="relative flex-1 bg-black min-h-[55dvh] overflow-hidden">
+        <span className="absolute top-2 left-2 z-30 text-[9px] text-white/30 font-mono">scan v2 · code+photo</span>
         <video ref={videoRef} playsInline muted className="absolute inset-0 w-full h-full object-cover" />
         <canvas ref={canvasRef} className="hidden" />
 
