@@ -11,6 +11,7 @@ const NAV = [
   { href: '/ops/scan/queue', label: 'File de validation' },
   { href: '/ops/stock', label: 'Stock Intelligence' },
   { href: '/ops/flash', label: 'Ventes Flash' },
+  { href: '/admin/settings', label: 'Réglages' },
 ];
 
 export default async function AdminLayout({ children }) {

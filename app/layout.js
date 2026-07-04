@@ -5,6 +5,8 @@ import CartDrawer from '@/components/shop/CartDrawer';
 import { QuickLookProvider } from '@/lib/quicklook/QuickLookContext';
 import QuickLookModal from '@/components/shop/QuickLookModal';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
+import { CurrencyProvider } from '@/lib/currency/CurrencyContext';
+import { getCurrencySettings } from '@/lib/currency/server';
 
 const display = Bricolage_Grotesque({
   subsets: ['latin'],
@@ -38,18 +40,21 @@ export const viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const { currency, rate } = await getCurrencySettings();
   return (
     <html lang="fr" className={`${display.variable} ${body.variable}`}>
       <body>
-        <CartProvider>
-          <QuickLookProvider>
-            {children}
-            <CartDrawer />
-            <QuickLookModal />
-            <ServiceWorkerRegister />
-          </QuickLookProvider>
-        </CartProvider>
+        <CurrencyProvider currency={currency} rate={rate}>
+          <CartProvider>
+            <QuickLookProvider>
+              {children}
+              <CartDrawer />
+              <QuickLookModal />
+              <ServiceWorkerRegister />
+            </QuickLookProvider>
+          </CartProvider>
+        </CurrencyProvider>
       </body>
     </html>
   );

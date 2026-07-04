@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useQuickLook } from '@/lib/quicklook/QuickLookContext';
 import { useCart } from '@/lib/cart/CartContext';
 import { localized } from '@/lib/i18n/dictionaries';
-import { formatPrice, discountPct } from '@/lib/utils';
+import { discountPct } from '@/lib/utils';
+import Money from './Money';
 import { scarcity } from '@/lib/rush/daily';
 import LiveViewers from './LiveViewers';
 
@@ -58,9 +59,9 @@ export default function QuickLookModal() {
 
             <div className="flex items-baseline gap-3">
               {product.market_price ? (
-                <span className="text-app-muted line-through">{formatPrice(product.market_price, product.currency)}</span>
+                <span className="text-app-muted line-through"><Money amount={product.market_price} /></span>
               ) : null}
-              <span className="font-display font-extrabold text-3xl text-app-accent">{formatPrice(product.outlet_price, product.currency)}</span>
+              <span className="font-display font-extrabold text-3xl text-app-accent"><Money amount={product.outlet_price} /></span>
             </div>
 
             {product.description ? (

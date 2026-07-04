@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useCart } from '@/lib/cart/CartContext';
-import { formatPrice } from '@/lib/utils';
+import Money from './Money';
 import { localized } from '@/lib/i18n/dictionaries';
 
 function mediaUrl(path) {
@@ -49,7 +49,7 @@ export default function CartDrawer() {
                     <div className="flex-1 min-w-0">
                       {it.brand ? <p className="text-[10px] uppercase tracking-widest text-app-muted">{it.brand}</p> : null}
                       <p className="text-sm font-medium leading-snug line-clamp-2">{localized(it.title, 'fr')}</p>
-                      <p className="text-app-accent font-display font-bold text-sm mt-1">{formatPrice(it.outlet_price, it.currency)}</p>
+                      <p className="text-app-accent font-display font-bold text-sm mt-1"><Money amount={it.outlet_price} /></p>
                       <div className="flex items-center gap-2 mt-2">
                         <div className="flex items-center border border-white/10 rounded-lg">
                           <button onClick={() => setQty(it.id, it.qty - 1)} className="px-2 py-0.5 text-app-muted hover:text-app-text">−</button>
@@ -66,7 +66,7 @@ export default function CartDrawer() {
             <div className="p-5 border-t border-white/5 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-app-muted">Sous-total</span>
-                <span className="font-display font-extrabold text-xl">{formatPrice(subtotal, items[0]?.currency ?? 'USD')}</span>
+                <span className="font-display font-extrabold text-xl"><Money amount={subtotal} /></span>
               </div>
               <Link href="/checkout" onClick={() => setOpen(false)} className="btn-rush w-full">
                 Passer la commande →

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/lib/cart/CartContext';
 import { placeCodOrder } from '@/lib/actions/orders';
-import { formatPrice } from '@/lib/utils';
+import Money from './Money';
 import { localized } from '@/lib/i18n/dictionaries';
 
 const inputCls = 'w-full rounded-lg bg-app-surface-2 border border-white/8 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--app-accent)]/60 transition-shadow duration-120';
@@ -132,15 +132,15 @@ export default function CheckoutClient() {
             {items.map((it) => (
               <div key={it.id} className="flex justify-between gap-3 text-sm">
                 <span className="text-app-muted min-w-0 truncate">{localized(it.title, 'fr')} ×{it.qty}</span>
-                <span className="shrink-0">{formatPrice(it.outlet_price * it.qty, it.currency)}</span>
+                <span className="shrink-0"><Money amount={it.outlet_price * it.qty} /></span>
               </div>
             ))}
           </div>
           <div className="border-t border-white/5 pt-3 space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-app-muted">Sous-total</span><span>{formatPrice(subtotal, 'USD')}</span></div>
+            <div className="flex justify-between"><span className="text-app-muted">Sous-total</span><span><Money amount={subtotal} /></span></div>
             <div className="flex justify-between"><span className="text-app-muted">Livraison</span><span className="text-app-success">À convenir</span></div>
             <div className="flex justify-between font-display font-extrabold text-lg pt-2">
-              <span>Total</span><span className="text-app-accent">{formatPrice(subtotal, 'USD')}</span>
+              <span>Total</span><span className="text-app-accent"><Money amount={subtotal} /></span>
             </div>
           </div>
           <button onClick={submit} disabled={pending} className="btn-rush w-full">
