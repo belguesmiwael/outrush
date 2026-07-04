@@ -31,8 +31,14 @@ export default function RushFeed({ products, locale = 'fr' }) {
             className="h-dvh snap-start relative flex items-end overflow-hidden"
           >
             {img ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={img} alt={localized(p.title, locale)} className="absolute inset-0 w-full h-full object-cover" />
+              <>
+                {/* Fond flouté de la même image — remplit sans bandes noires */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-40" />
+                {/* Image complète, adaptée à l'écran, sans perte de résolution */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img} alt={localized(p.title, locale)} className="absolute inset-0 w-full h-full object-contain" />
+              </>
             ) : (
               <div className="absolute inset-0 grid place-items-center font-display text-8xl text-app-accent/20">O</div>
             )}

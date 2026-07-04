@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import Link from 'next/link';
 import { localized } from '@/lib/i18n/dictionaries';
 import { formatPrice } from '@/lib/utils';
+import HeroGame from './HeroGame';
 
 function mediaUrl(path) {
   return path
@@ -77,31 +78,10 @@ export default function Hero({ product, pct, locale = 'fr' }) {
           </div>
         </div>
 
-        {/* Spotlight produit */}
-        {product ? (
-          <div ref={artRef} className="relative transition-transform duration-500 ease-out will-change-transform">
-            <div className="absolute inset-6 rounded-[2rem] halo-live"
-              style={{ background: 'radial-gradient(circle, oklch(62% 0.24 25 / 0.22), transparent 70%)' }} />
-            <Link href={`/product/${product.slug}`} className="relative block float-soft">
-              <div className="card-premium overflow-hidden aspect-[4/5] max-w-sm mx-auto">
-                {img ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={img} alt={localized(product.title, locale)} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full grid place-items-center font-display text-8xl text-app-accent/25">O</div>
-                )}
-                {pct ? <span className="seal absolute top-4 left-4">−{pct}%</span> : null}
-                <div className="absolute inset-x-0 bottom-0 p-5" style={{ background: 'linear-gradient(to top, oklch(10% 0.01 264 / 0.9), transparent)' }}>
-                  {product.brand ? <p className="text-white/60 text-xs uppercase tracking-widest">{product.brand}</p> : null}
-                  <p className="font-display font-bold text-white line-clamp-1">{localized(product.title, locale)}</p>
-                  <p className="text-app-accent font-display font-extrabold text-xl mt-1">
-                    {formatPrice(product.outlet_price, product.currency, locale)}
-                  </p>
-                </div>
-              </div>
-            </Link>
-          </div>
-        ) : null}
+        {/* Zone de jeu interactive — chasse aux économies */}
+        <div className="relative">
+          <HeroGame />
+        </div>
       </div>
 
       {/* Bandeau valeurs défilant */}

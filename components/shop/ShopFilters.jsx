@@ -1,6 +1,6 @@
 'use client';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 
 const SORTS = [
   ['trending', 'Tendance'],
@@ -14,12 +14,19 @@ export default function ShopFilters({ categories = [], locale = 'fr', current = 
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
+  const debounceRef = useRef(null);
 
   const setParam = useCallback((key, value) => {
     const p = new URLSearchParams(params.toString());
     if (value) p.set(key, value); else p.delete(key);
-    router.push(`${pathname}?${p.toString()}`);
+    router.push(`${pathname}?${p.toString()}`, { scroll: false });
   }, [params, pathname, router]);
+
+  // Recherche live : les résultats se mettent à jour à la frappe (debounce 250ms)
+  const onSearchInput = useCallback((value) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setParam('q', value.trim()), 250);
+  }, [setParam]);
 
   return (
     <div className="space-y-4">
@@ -27,7 +34,7 @@ export default function ShopFilters({ categories = [], locale = 'fr', current = 
       <div className="flex gap-2">
         <input
           defaultValue={current.q ?? ''}
-          onKeyDown={(e) => { if (e.key === 'Enter') setParam('q', e.currentTarget.value); }}
+          onChange={(e) => onSearchInput(e.target.value)}
           placeholder="Cherchez une marque, un produit…"
           className="flex-1 rounded-full bg-white/5 border border-white/8 px-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--app-accent)]/50 transition-shadow duration-120"
         />
