@@ -22,6 +22,7 @@ export default function HeroGame({ products = [], locale = 'fr' }) {
   const [bursts, setBursts] = useState([]);
   const [coins, setCoins] = useState([]);
   const [saved, setSaved] = useState(0);
+  const [last, setLast] = useState(null);
   const [target, setTarget] = useState({ x: -100, y: -100, active: false });
   const audioRef = useRef(null);
   const reduced = useRef(false);
@@ -45,28 +46,34 @@ export default function HeroGame({ products = [], locale = 'fr' }) {
     }
     return audioRef.current;
   }
-  const shotSound = useCallback(() => {
+
+  // Son de TIROIR-CAISSE (cha-ching) : clac mécanique + double clochette métallique
+  const registerSound = useCallback(() => {
     const ctx = ac(); if (!ctx) return;
-    const dur = 0.12;
+    const t0 = ctx.currentTime;
+
+    // 1) Clac du tiroir : bruit court filtré (mécanique)
+    const dur = 0.06;
     const buf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
     const data = buf.getChannelData(0);
     for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
-    const src = ctx.createBufferSource(); src.buffer = buf;
-    const g = ctx.createGain(); g.gain.setValueAtTime(0.22, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
-    const flt = ctx.createBiquadFilter(); flt.type = 'lowpass'; flt.frequency.value = 1600;
-    src.connect(flt).connect(g).connect(ctx.destination); src.start();
-  }, []);
-  const coinSound = useCallback(() => {
-    const ctx = ac(); if (!ctx) return;
-    [988, 1319].forEach((f, i) => {
-      const osc = ctx.createOscillator(); const g = ctx.createGain();
-      osc.type = 'square'; osc.frequency.value = f;
-      const t = ctx.currentTime + i * 0.07;
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.1, t + 0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
-      osc.connect(g).connect(ctx.destination); osc.start(t); osc.stop(t + 0.13);
+    const noise = ctx.createBufferSource(); noise.buffer = buf;
+    const nf = ctx.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 2200;
+    const ng = ctx.createGain(); ng.gain.setValueAtTime(0.3, t0); ng.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+    noise.connect(nf).connect(ng).connect(ctx.destination); noise.start(t0);
+
+    // 2) Double clochette "cha-CHING" : deux dings métalliques
+    [[1568, 0.05], [2093, 0.13]].forEach(([f, delay]) => {
+      const t = t0 + delay;
+      [f, f * 2.01, f * 2.99].forEach((freq, k) => {
+        const osc = ctx.createOscillator(); const g = ctx.createGain();
+        osc.type = 'sine'; osc.frequency.value = freq;
+        const amp = 0.12 / (k + 1);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(amp, t + 0.006);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+        osc.connect(g).connect(ctx.destination); osc.start(t); osc.stop(t + 0.42);
+      });
     });
   }, []);
 
@@ -80,10 +87,11 @@ export default function HeroGame({ products = [], locale = 'fr' }) {
         const src = pool.current[Math.floor(Math.random() * pool.current.length)];
         return [...prev, {
           id: ++idc, ...src,
-          x: 8 + Math.random() * 88,
+          x: 52 + Math.random() * 44, // moitié droite uniquement (52%→96%)
           y: -6,
           speed: 0.16 + Math.random() * 0.2,
           rot: -12 + Math.random() * 24,
+          size: 44 + Math.round(Math.random() * 52), // taille aléatoire 44→96px
         }];
       });
     }, 1100);
@@ -119,21 +127,28 @@ export default function HeroGame({ products = [], locale = 'fr' }) {
     setBursts((b) => [...b, { id: it.id, x: it.x, y: it.y }]);
     setCoins((c) => [...c, { id: ++idc, x: it.x, y: it.y, vy: 0.3, life: 55, amount: it.saving }]);
     setSaved((s) => s + it.saving);
-    shotSound(); coinSound();
+    setLast(it.saving);
+    registerSound();
     setTimeout(() => setBursts((bb) => bb.filter((b) => b.id !== it.id)), 400);
-  }, [shotSound, coinSound]);
+  }, [registerSound]);
 
   function onMove(e) {
     const rect = zoneRef.current?.getBoundingClientRect();
     if (!rect) return;
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
+    // La chasse n'est active que dans la moitié droite (ne gêne pas le texte)
+    if (x < 50) {
+      setTarget((t) => (t.active ? { ...t, active: false } : t));
+      return;
+    }
     setTarget({ x, y, active: true });
     setItems((prev) => {
       const remaining = [];
       let hit = null;
       for (const it of prev) {
-        if (!hit && Math.hypot(it.x - x, (it.y - y) * (rect.height / rect.width)) < 6) hit = it;
+        const r = (it.size ?? 60) / 900 + 0.05; // rayon selon la taille
+        if (!hit && Math.hypot((it.x - x) / 100, ((it.y - y) / 100) * (rect.height / rect.width)) < r) hit = it;
         else remaining.push(it);
       }
       if (hit) { explode(hit); return remaining; }
@@ -149,23 +164,32 @@ export default function HeroGame({ products = [], locale = 'fr' }) {
       onMouseMove={onMove}
       onMouseLeave={() => setTarget((t) => ({ ...t, active: false }))}
       className="absolute inset-0 z-10 overflow-hidden select-none"
-      style={{ cursor: 'none' }}
+      style={{ cursor: target.active ? 'none' : 'default' }}
     >
       {/* Ligne de sol */}
       <div className="absolute inset-x-0" style={{ top: '92%', height: '1px', background: 'linear-gradient(90deg, transparent, oklch(62% 0.24 25 / 0.3), transparent)' }} />
 
-      {/* Compteur d'economies (a droite pour ne pas gener le texte) */}
-      <div className="absolute top-5 right-5 z-20 pointer-events-none text-right">
-        <p className="text-[10px] uppercase tracking-[0.3em] text-app-muted">Economies chassees</p>
-        <p className="font-display font-extrabold text-3xl text-app-success tabular-nums">{displayMoney(saved, cur)}</p>
-        <p className="text-[10px] uppercase tracking-[0.25em] text-app-accent mt-1">Visez - Tirez</p>
+      {/* Double compteur : dernière offre ciblée + total cumulé */}
+      <div className="absolute top-5 right-5 z-20 pointer-events-none text-right space-y-2">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-app-muted">Dernière offre</p>
+          <p className="font-display font-extrabold text-2xl text-app-accent tabular-nums">
+            {last !== null ? `+${displayMoney(last, cur)}` : '—'}
+          </p>
+        </div>
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-app-muted">Total chassé</p>
+          <p className="font-display font-extrabold text-3xl text-app-success tabular-nums">{displayMoney(saved, cur)}</p>
+        </div>
+        <p className="text-[10px] uppercase tracking-[0.25em] text-app-accent">Visez · Tirez →</p>
       </div>
 
-      {/* Produits qui tombent */}
+      {/* Produits qui tombent (tailles variables) */}
       {items.map((it) => (
         <div key={it.id} className="absolute z-10 pointer-events-none"
           style={{ left: `${it.x}%`, top: `${it.y}%`, transform: `translate(-50%,-50%) rotate(${it.rot}deg)` }}>
-          <div className="w-16 h-16 rounded-2xl overflow-hidden border border-white/15 shadow-lg" style={{ background: 'oklch(20% 0.02 264)' }}>
+          <div className="rounded-2xl overflow-hidden border border-white/15 shadow-lg"
+            style={{ width: it.size, height: it.size, background: 'oklch(20% 0.02 264)' }}>
             {it.img ? <img src={it.img} alt="" className="w-full h-full object-cover" /> : null}
           </div>
         </div>
