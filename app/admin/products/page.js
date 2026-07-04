@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { setProductStatus, deleteProduct, applyPhotoStudio, enrichGallery } from '@/lib/actions/admin-products';
+import { ProductSelectProvider, ProductCheckbox, BulkActionBar } from '@/components/admin/ProductBulkSelect';
 import { localized } from '@/lib/i18n/dictionaries';
 import { formatPrice, discountPct } from '@/lib/utils';
 
@@ -34,6 +35,7 @@ export default async function AdminProductsPage({ searchParams }) {
   const { data: products } = await query;
 
   return (
+    <ProductSelectProvider>
     <main className="p-6 md:p-10 space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <h1 className="font-display font-bold text-3xl">Produits</h1>
@@ -87,6 +89,7 @@ export default async function AdminProductsPage({ searchParams }) {
             const pct = discountPct(p.market_price, p.outlet_price);
             return (
               <div key={p.id} className="card-hunt p-3 flex items-center gap-4">
+                <ProductCheckbox id={p.id} />
                 <div className="w-14 h-14 rounded-lg overflow-hidden bg-app-surface-2 shrink-0">
                   {img ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -161,6 +164,8 @@ export default async function AdminProductsPage({ searchParams }) {
           })}
         </div>
       )}
+      <BulkActionBar />
     </main>
+    </ProductSelectProvider>
   );
 }

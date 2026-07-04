@@ -39,7 +39,7 @@ export default async function AdminDashboard() {
     ['Produits en ligne', published ?? 0, '/admin/products', 'var(--app-success)'],
     ['Stock dormant', dormants ?? 0, '/ops/stock', 'var(--app-accent)'],
     ['Packs actifs', packs ?? 0, '/ops/stock', 'var(--app-text)'],
-    ['Lots à valider', pending ?? 0, '/ops/scan/queue', 'var(--app-text)'],
+    ['Lots à valider', pending ?? 0, '/admin/scan', 'var(--app-text)'],
     ['Vendus aujourd\'hui', soldToday, null, 'var(--app-success)'],
     ['Ventes totales', unitsSold, null, 'var(--app-text)'],
   ];
@@ -52,7 +52,7 @@ export default async function AdminDashboard() {
           <p className="text-app-muted text-sm mt-1">Le cerveau d'OUTRUSH — pilotez, l'IA exécute.</p>
         </div>
         <div className="flex gap-2">
-          <Link href="/ops/scan" className="rounded-lg px-4 py-2.5 font-display font-bold text-sm border border-white/10 hover:border-app-accent hover:text-app-accent transition-colors duration-120">📷 Scanner</Link>
+          <Link href="/admin/scan" className="rounded-lg px-4 py-2.5 font-display font-bold text-sm border border-white/10 hover:border-app-accent hover:text-app-accent transition-colors duration-120">📷 Scanner</Link>
           <Link href="/admin/products/new" className="rounded-lg px-4 py-2.5 font-display font-bold text-sm bg-app-accent text-white transition-transform duration-120 hover:scale-[1.02] active:scale-95">+ Produit</Link>
         </div>
       </div>

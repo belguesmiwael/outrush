@@ -4,11 +4,10 @@ import OrderNotifier from '@/components/admin/OrderNotifier';
 
 const NAV = [
   { href: '/admin', label: 'Tableau de bord' },
+  { href: '/admin/scan', label: 'Scanner' },
   { href: '/admin/products', label: 'Produits' },
   { href: '/admin/orders', label: 'Commandes' },
   { href: '/admin/products/new', label: '+ Nouveau produit' },
-  { href: '/ops/scan', label: 'Scanner' },
-  { href: '/ops/scan/queue', label: 'File de validation' },
   { href: '/ops/stock', label: 'Stock Intelligence' },
   { href: '/ops/flash', label: 'Ventes Flash' },
   { href: '/admin/settings', label: 'Réglages' },
