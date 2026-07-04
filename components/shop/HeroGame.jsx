@@ -143,15 +143,20 @@ export default function HeroGame({ products = [], locale = 'fr' }) {
       return;
     }
     setTarget({ x, y, active: true });
+
+    // Collision en PIXELS réels : la cible doit vraiment être sur le produit.
+    const px = e.clientX - rect.left;
+    const py = e.clientY - rect.top;
     setItems((prev) => {
-      const remaining = [];
       let hit = null;
       for (const it of prev) {
-        const r = (it.size ?? 60) / 900 + 0.05; // rayon selon la taille
-        if (!hit && Math.hypot((it.x - x) / 100, ((it.y - y) / 100) * (rect.height / rect.width)) < r) hit = it;
-        else remaining.push(it);
+        const ix = (it.x / 100) * rect.width;
+        const iy = (it.y / 100) * rect.height;
+        const half = (it.size ?? 60) / 2;
+        // Touche si le centre de la cible est dans la vignette (+ petite marge)
+        if (Math.abs(px - ix) <= half + 4 && Math.abs(py - iy) <= half + 4) { hit = it; break; }
       }
-      if (hit) { explode(hit); return remaining; }
+      if (hit) { explode(hit); return prev.filter((i) => i.id !== hit.id); }
       return prev;
     });
   }
@@ -223,7 +228,26 @@ export default function HeroGame({ products = [], locale = 'fr' }) {
       {/* Curseur cible */}
       {target.active ? (
         <div className="absolute z-30 pointer-events-none" style={{ left: `${target.x}%`, top: `${target.y}%`, transform: 'translate(-50%,-50%)' }}>
-          <div className="hg-crosshair" />
+          <svg width="64" height="64" viewBox="0 0 64 64" className="hg-scope">
+            <circle cx="32" cy="32" r="26" fill="none" stroke="var(--app-accent)" strokeWidth="1.5" opacity="0.9" />
+            <circle cx="32" cy="32" r="18" fill="none" stroke="var(--app-accent)" strokeWidth="1" opacity="0.5" />
+            {/* Graduations */}
+            <g stroke="var(--app-accent)" strokeWidth="2">
+              <line x1="32" y1="2" x2="32" y2="12" />
+              <line x1="32" y1="52" x2="32" y2="62" />
+              <line x1="2" y1="32" x2="12" y2="32" />
+              <line x1="52" y1="32" x2="62" y2="32" />
+            </g>
+            {/* Croix centrale fine avec écart */}
+            <g stroke="var(--app-accent)" strokeWidth="1">
+              <line x1="32" y1="24" x2="32" y2="29" />
+              <line x1="32" y1="35" x2="32" y2="40" />
+              <line x1="24" y1="32" x2="29" y2="32" />
+              <line x1="35" y1="32" x2="40" y2="32" />
+            </g>
+            {/* Point de visée */}
+            <circle cx="32" cy="32" r="1.6" fill="var(--app-accent)" />
+          </svg>
         </div>
       ) : null}
 
@@ -234,10 +258,9 @@ export default function HeroGame({ products = [], locale = 'fr' }) {
       ) : null}
 
       <style>{`
-        .hg-crosshair { width: 46px; height: 46px; border: 2px solid var(--app-accent); border-radius: 50%; position: relative; box-shadow: 0 0 20px oklch(62% 0.24 25 / 0.6); }
-        .hg-crosshair::before, .hg-crosshair::after { content: ''; position: absolute; background: var(--app-accent); }
-        .hg-crosshair::before { width: 2px; height: 14px; left: 50%; top: -8px; transform: translateX(-50%); }
-        .hg-crosshair::after { width: 14px; height: 2px; top: 50%; left: -8px; transform: translateY(-50%); }
+        .hg-scope { filter: drop-shadow(0 0 8px oklch(62% 0.24 25 / 0.7)); animation: hgScope 3s linear infinite; }
+        @keyframes hgScope { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { .hg-scope { animation: none; } }
         .hg-burst { width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle, oklch(62% 0.24 25 / 0.9), transparent 70%); animation: hgBurst 0.4s ease-out forwards; }
         @keyframes hgBurst { 0% { transform: scale(0.3); opacity: 1; } 100% { transform: scale(2.4); opacity: 0; } }
       `}</style>
