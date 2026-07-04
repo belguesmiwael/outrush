@@ -31,13 +31,13 @@ export default async function HomePage() {
       .maybeSingle(),
     supabase
       .from('products')
-      .select('id, slug, title, brand, images, market_price, outlet_price, currency, category_id, quantity')
+      .select('id, slug, title, brand, images, market_price, outlet_price, currency, category_id, quantity, velocity_14d, views, description')
       .eq('status', 'published')
       .order('created_at', { ascending: false })
       .limit(60),
     supabase
       .from('products')
-      .select('id, slug, title, brand, images, market_price, outlet_price, currency')
+      .select('id, slug, title, brand, images, market_price, outlet_price, currency, quantity, velocity_14d, views, description')
       .eq('status', 'published')
       .order('velocity_14d', { ascending: false })
       .limit(12),
@@ -63,6 +63,10 @@ export default async function HomePage() {
     8
   );
   const rotationSeconds = secondsUntilRotation();
+
+  // Ventes réelles des dernières 24h (preuve sociale véridique)
+  const { data: salesData } = await supabase.rpc('sales_last_24h');
+  const soldById = new Map((salesData ?? []).map((r) => [r.product_id, Number(r.sold)]));
   // Catégories racines (univers) pour le bandeau dense
   const rootCategories = (categories ?? []).filter((c) => !c.parent_id);
   const catById = new Map((categories ?? []).map((c) => [c.id, c]));
@@ -95,7 +99,7 @@ export default async function HomePage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-stretch">
             {dailyRush.map((p, i) => (
-              <ProductCard key={p.id} product={p} locale={locale} index={i} />
+              <ProductCard key={p.id} product={p} locale={locale} index={i} sold={soldById.get(p.id) ?? 0} />
             ))}
           </div>
           <div className="mt-6 text-center">
@@ -138,7 +142,7 @@ export default async function HomePage() {
           <div className="flex gap-4 overflow-x-auto no-scrollbar pb-3 snap-x items-stretch">
             {bestSellers.map((p, i) => (
               <div key={p.id} className="snap-start shrink-0 w-44 sm:w-48 flex">
-                <ProductCard product={p} locale={locale} index={i} />
+                <ProductCard product={p} locale={locale} index={i} sold={soldById.get(p.id) ?? 0} />
               </div>
             ))}
           </div>
@@ -255,7 +259,7 @@ export default async function HomePage() {
         {products?.length ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">
             {products.map((p, i) => (
-              <ProductCard key={p.id} product={p} locale={locale} index={i} />
+              <ProductCard key={p.id} product={p} locale={locale} index={i} sold={soldById.get(p.id) ?? 0} />
             ))}
           </div>
         ) : (

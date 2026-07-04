@@ -6,6 +6,7 @@ import PriceReveal from '@/components/shop/PriceReveal';
 import SiteHeader from '@/components/shop/SiteHeader';
 import SiteFooter from '@/components/shop/SiteFooter';
 import AddToCartButton from '@/components/shop/AddToCartButton';
+import LiveViewers from '@/components/shop/LiveViewers';
 import { formatPrice } from '@/lib/utils';
 
 export const revalidate = 120;
@@ -24,6 +25,11 @@ export default async function ProductPage({ params }) {
     .maybeSingle();
 
   if (!product) notFound();
+
+  // Incrément de vue réel (fire-and-forget) + ventes réelles 24h
+  supabase.rpc('bump_product_views', { p_id: product.id }).then(() => {});
+  const { data: sales24 } = await supabase.rpc('sales_last_24h');
+  const soldToday = (sales24 ?? []).find((r) => r.product_id === product.id)?.sold ?? 0;
 
   const images = Array.isArray(product.images) ? product.images : [];
   const mainImg = images[0]
@@ -87,6 +93,24 @@ export default async function ProductPage({ params }) {
           {product.description ? (
             <p className="text-app-muted leading-relaxed">{localized(product.description, locale)}</p>
           ) : null}
+
+          {/* Signaux de conversion — données réelles */}
+          <div className="flex flex-wrap gap-2 text-xs">
+            {product.quantity > 0 && product.quantity <= 5 ? (
+              <span className="px-2.5 py-1 rounded-full bg-[color:var(--app-accent)]/15 text-app-accent font-medium pulse-last">
+                ⚡ Plus que {product.quantity} en stock
+              </span>
+            ) : product.quantity > 0 ? (
+              <span className="px-2.5 py-1 rounded-full bg-white/5 text-app-muted">En stock : {product.quantity}</span>
+            ) : null}
+            {soldToday > 0 ? (
+              <span className="px-2.5 py-1 rounded-full bg-white/5 text-app-muted">🛒 {soldToday} vendu{soldToday > 1 ? 's' : ''} aujourd'hui</span>
+            ) : null}
+            {product.views > 0 ? (
+              <span className="px-2.5 py-1 rounded-full bg-white/5 text-app-muted">👁 {product.views} vues</span>
+            ) : null}
+            <LiveViewers productId={product.id} />
+          </div>
 
           <AddToCartButton product={product} className="md:w-auto md:px-12" />
 

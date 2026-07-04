@@ -2,6 +2,8 @@ import { Bricolage_Grotesque, Onest } from 'next/font/google';
 import './globals.css';
 import { CartProvider } from '@/lib/cart/CartContext';
 import CartDrawer from '@/components/shop/CartDrawer';
+import { QuickLookProvider } from '@/lib/quicklook/QuickLookContext';
+import QuickLookModal from '@/components/shop/QuickLookModal';
 
 const display = Bricolage_Grotesque({
   subsets: ['latin'],
@@ -35,8 +37,11 @@ export default function RootLayout({ children }) {
     <html lang="fr" className={`${display.variable} ${body.variable}`}>
       <body>
         <CartProvider>
-          {children}
-          <CartDrawer />
+          <QuickLookProvider>
+            {children}
+            <CartDrawer />
+            <QuickLookModal />
+          </QuickLookProvider>
         </CartProvider>
       </body>
     </html>
