@@ -20,7 +20,12 @@ export async function POST() {
     return NextResponse.json({ error: 'forbidden' }, { status: 403 });
   }
 
-  const admin = createAdminClient();
+  let admin;
+  try {
+    admin = createAdminClient();
+  } catch (err) {
+    return NextResponse.json({ recovered: 0, error: err?.message ?? 'admin_client_failed' }, { status: 500 });
+  }
   const oneMinAgo = new Date(Date.now() - 60_000).toISOString();
   const { data: stuck } = await admin
     .from('scan_events')
@@ -33,15 +38,17 @@ export async function POST() {
   if (!stuck?.length) return NextResponse.json({ recovered: 0 });
 
   let recovered = 0;
+  let lastError = null;
   for (const scan of stuck) {
     try {
       if (scan.enrichment?.method === 'photo') await enrichPhotoScan(scan.id);
       else await enrichScan(scan.id);
       recovered++;
     } catch (err) {
-      console.error('recover scan failed', { scanId: scan.id, message: err?.message });
+      lastError = err?.message ?? 'unknown';
+      console.error('recover scan failed', { scanId: scan.id, message: lastError });
       await admin.from('scan_events').update({ status: 'not_found' }).eq('id', scan.id);
     }
   }
-  return NextResponse.json({ recovered });
+  return NextResponse.json({ recovered, error: lastError });
 }

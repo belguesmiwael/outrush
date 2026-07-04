@@ -13,7 +13,11 @@ export default function RecoverScansButton({ count }) {
       try {
         const res = await fetch('/api/scan/recover', { method: 'POST' });
         const json = await res.json().catch(() => ({}));
-        setMsg(res.ok ? `${json.recovered ?? 0} fiche(s) relancée(s).` : 'Échec de la relance.');
+        if (!res.ok || json.error) {
+          setMsg(`Erreur : ${json.error ?? 'échec'}`);
+        } else {
+          setMsg(`${json.recovered ?? 0} fiche(s) relancée(s).`);
+        }
         router.refresh();
       } catch {
         setMsg('Échec réseau.');
