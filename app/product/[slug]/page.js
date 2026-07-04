@@ -114,7 +114,7 @@ export default async function ProductPage({ params }) {
               <h2 className="font-display font-bold">Avis vérifiés</h2>
               {product.reviews.slice(0, 5).map((r, i) => (
                 <div key={i} className="text-sm">
-                  <span className="text-app-accent">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
+                  <span className="text-app-accent">{'★'.repeat(Math.max(0, Math.min(5, Number(r.rating) || 0)))}{'☆'.repeat(5 - Math.max(0, Math.min(5, Number(r.rating) || 0)))}</span>
                   {r.body ? <p className="text-app-muted mt-1">{r.body}</p> : null}
                 </div>
               ))}

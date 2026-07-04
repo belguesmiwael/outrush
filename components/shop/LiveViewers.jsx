@@ -13,8 +13,11 @@ export default function LiveViewers({ productId, className = '' }) {
   useEffect(() => {
     if (!productId) return;
     const supabase = createClient();
+    const uid = (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : `u-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const channel = supabase.channel(`presence:product:${productId}`, {
-      config: { presence: { key: crypto.randomUUID() } },
+      config: { presence: { key: uid } },
     });
 
     channel

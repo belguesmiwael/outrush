@@ -17,8 +17,12 @@ export function useCurrency() {
 }
 
 /** Convertit un montant USD vers la devise d'affichage et le formate. */
-export function displayMoney(amountUsd, { currency, rate, symbol }) {
-  const v = Number(amountUsd) * rate;
+export function displayMoney(amountUsd, ctx) {
+  const currency = ctx?.currency ?? 'USD';
+  const rate = Number(ctx?.rate) || 1;
+  const symbol = ctx?.symbol ?? SYMBOLS[currency] ?? '$';
+  const n = Number(amountUsd);
+  const v = (Number.isFinite(n) ? n : 0) * rate;
   const formatted = v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   return currency === 'TND' ? `${formatted} ${symbol}` : `${symbol}${formatted}`;
 }
