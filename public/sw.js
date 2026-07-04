@@ -1,9 +1,25 @@
-// Service worker minimal — active l'installabilité PWA (offline-first léger)
-const CACHE = 'outrush-v1';
-self.addEventListener('install', (e) => { self.skipWaiting(); });
-self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
+// Service worker — v2. Ne cache JAMAIS les pages ops/admin ni les routes API
+// (toujours du réseau frais). Se met à jour immédiatement.
+const CACHE = 'outrush-v2';
+
+self.addEventListener('install', () => { self.skipWaiting(); });
+self.addEventListener('activate', (e) => {
+  e.waitUntil((async () => {
+    // Purge les anciens caches
+    const keys = await caches.keys();
+    await Promise.all(keys.map((k) => k !== CACHE ? caches.delete(k) : null));
+    await self.clients.claim();
+  })());
+});
+
 self.addEventListener('fetch', (e) => {
-  // Network-first pour le contenu frais ; pas de cache agressif (stock temps réel)
-  if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  // Jamais de cache pour l'app dynamique : ops, admin, API, auth
+  const noCache = url.pathname.startsWith('/ops') || url.pathname.startsWith('/admin')
+    || url.pathname.startsWith('/api') || url.pathname.startsWith('/auth');
+  if (e.request.method !== 'GET' || noCache) {
+    return; // laisse passer au réseau, sans interception
+  }
+  // Réseau d'abord pour tout le reste
   e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
 });

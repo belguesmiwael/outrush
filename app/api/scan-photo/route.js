@@ -82,10 +82,18 @@ export async function POST(request) {
       .update({ status: 'enriching', enrichment: { capture_path: capturePath, method: 'photo', barcode } })
       .eq('id', scan.id);
 
-    // Marque enriching et RENVOIE tout de suite (l'enrichissement IA + web
-    // dépasse la limite Hobby de Vercel). L'identification se fait ensuite via
-    // le bouton "Relancer" (/api/scan/recover) ou un cron.
-    return NextResponse.json({ id: scan.id, status: 'enriching' }, { status: 202 });
+    // Enrichissement vision DANS la requête (pas de recherche web → rapide, tient
+    // dans la limite Hobby). Renvoie le vrai statut final.
+    let finalStatus = 'enriching';
+    try {
+      await enrichPhotoScan(scan.id);
+      const { data: refreshed } = await admin
+        .from('scan_events').select('status').eq('id', scan.id).single();
+      finalStatus = refreshed?.status ?? 'ready';
+    } catch (err) {
+      console.error('enrichPhotoScan failed', { scanId: scan.id, message: err?.message });
+    }
+    return NextResponse.json({ id: scan.id, status: finalStatus }, { status: 200 });
   } catch (err) {
     console.error('scan-photo route error', { message: err?.message });
     return NextResponse.json({ error: 'internal' }, { status: 500 });
