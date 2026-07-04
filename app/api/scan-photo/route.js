@@ -45,14 +45,22 @@ export async function POST(request) {
       return NextResponse.json({ error: 'bad_photo' }, { status: 400 });
     }
 
+    // Code-barres optionnel joint à la photo (produit avec code → identif. plus sûre)
+    const rawCode = String(form?.get('code') ?? '').trim();
+    const barcode = /^\d{8,14}$/.test(rawCode) ? rawCode : null;
+
     const admin = createAdminClient();
     const buf = Buffer.from(await photo.arrayBuffer());
     const ext = photo.type === 'image/png' ? 'png' : photo.type === 'image/webp' ? 'webp' : 'jpg';
 
-    // scan_event via le client USER → RLS operator_id = auth.uid()
+    // scan_event : code réel si présent, sinon marqueur photo
     const { data: scan, error: scanErr } = await supabase
       .from('scan_events')
-      .insert({ code: `photo-${Date.now()}`, code_type: 'manual', operator_id: user.id })
+      .insert({
+        code: barcode ?? `photo-${Date.now()}`,
+        code_type: barcode ? (barcode.length === 12 ? 'upca' : 'ean13') : 'manual',
+        operator_id: user.id,
+      })
       .select('id')
       .single();
     if (scanErr) {
@@ -71,7 +79,7 @@ export async function POST(request) {
     }
     await supabase
       .from('scan_events')
-      .update({ status: 'enriching', enrichment: { capture_path: capturePath, method: 'photo' } })
+      .update({ status: 'enriching', enrichment: { capture_path: capturePath, method: 'photo', barcode } })
       .eq('id', scan.id);
 
     // Marque enriching et RENVOIE tout de suite (l'enrichissement IA + web

@@ -53,15 +53,13 @@ export default function MobileScanner({ token }) {
     };
   }, [token]);
 
-  // Code-barres/QR détecté en continu → broadcast au PC (dédup permanente)
+  // Code-barres/QR détecté → mémorisé (PAS envoyé seul). Il accompagnera la photo.
+  const [pendingCode, setPendingCode] = useState(null);
   const onCode = useCallback(
     (code, codeType) => {
-      const ch = channelRef.current;
-      if (!ch) return;
-      if (sentCodesRef.current.has(code)) return;
-      sentCodesRef.current.add(code);
-      ch.send({ type: 'broadcast', event: 'scan', payload: { code, codeType } });
-      setSent((prev) => [{ label: code, at: Date.now(), kind: 'code' }, ...prev].slice(0, 8));
+      if (sentCodesRef.current.has(code)) return; // déjà traité cette session
+      setPendingCode({ code, codeType });
+      if (navigator.vibrate) navigator.vibrate(50);
     },
     []
   );
@@ -94,20 +92,26 @@ export default function MobileScanner({ token }) {
   async function sendPhoto() {
     if (!snapshot?.blob) return;
     setSending(true);
+    const joinedCode = pendingCode?.code ?? null;
     try {
       const fd = new FormData();
       fd.set('photo', snapshot.blob, 'capture.jpg');
+      if (joinedCode) fd.set('code', joinedCode); // code + image ensemble
       const res = await fetch('/api/scan-photo', { method: 'POST', body: fd });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error || 'photo_failed');
-      // Prévient le PC qu'une fiche photo arrive dans la file de validation
+      if (joinedCode) sentCodesRef.current.add(joinedCode); // dédup
       channelRef.current?.send({
         type: 'broadcast',
         event: 'photo',
         payload: { scanId: json.id, status: json.status },
       });
-      setSent((prev) => [{ label: '📷 Produit photographié', at: Date.now(), kind: 'photo' }, ...prev].slice(0, 8));
+      setSent((prev) => [{
+        label: joinedCode ? `▐▐▐ ${joinedCode} + photo` : '📷 Produit photographié',
+        at: Date.now(), kind: 'photo',
+      }, ...prev].slice(0, 8));
       setSnapshot(null);
+      setPendingCode(null);
     } catch {
       setSent((prev) => [{ label: '📷 Échec envoi', at: Date.now(), kind: 'error' }, ...prev].slice(0, 8));
     } finally {
@@ -135,7 +139,9 @@ export default function MobileScanner({ token }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={snapshot.dataUrl} alt="Aperçu" className="absolute inset-0 w-full h-full object-contain" />
           <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/60 rounded-full px-4 py-1.5">
-            <span className="text-xs text-white/90 font-medium">Cette photo est-elle nette ?</span>
+            <span className="text-xs text-white/90 font-medium">
+              {pendingCode ? `Code ${pendingCode.code} + photo → identification sûre` : 'Cette photo est-elle nette ?'}
+            </span>
           </div>
         </div>
         <div className="bg-app-bg p-4 flex gap-3 safe-bottom">
@@ -173,10 +179,21 @@ export default function MobileScanner({ token }) {
             style={{ boxShadow: '0 0 0 9999px oklch(0% 0 0 / 0.45)' }}
           >
             <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] tracking-[0.35em] uppercase bg-black/60 px-3 py-1 rounded-full text-white/80 whitespace-nowrap">
-              {locked ? '✓ Code détecté' : 'Code-barres auto · ou photo'}
+              {pendingCode ? '✓ Code lu — cadrez et photographiez' : 'Visez le code-barres, ou photo directe'}
             </span>
           </div>
         </div>
+
+        {/* Bandeau code verrouillé */}
+        {pendingCode ? (
+          <div className="absolute top-16 inset-x-0 flex justify-center px-4">
+            <div className="glass rounded-full px-4 py-2 flex items-center gap-3 text-sm">
+              <span className="text-app-accent font-mono font-bold">▐▐▐ {pendingCode.code}</span>
+              <span className="text-white/70">→ prenez la photo</span>
+              <button onClick={() => setPendingCode(null)} className="text-white/50 hover:text-white text-xs">✕</button>
+            </div>
+          </div>
+        ) : null}
 
         {/* Bandeau statut */}
         <div className="absolute top-0 inset-x-0 p-4 flex items-center justify-between">
@@ -211,7 +228,7 @@ export default function MobileScanner({ token }) {
             <span className="rounded-full bg-app-accent" style={{ width: 56, height: 56 }} />
           </button>
           <span className="text-[11px] text-white/70 bg-black/50 px-3 py-1 rounded-full">
-            📷 Photo produit (sans code-barres)
+            {pendingCode ? '📷 Photo du produit (code inclus)' : '📷 Photo produit (sans code-barres)'}
           </span>
         </div>
 
