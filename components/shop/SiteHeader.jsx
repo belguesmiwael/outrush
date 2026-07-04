@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { localized } from '@/lib/i18n/dictionaries';
+import CartButton from './CartButton';
 
 export default function SiteHeader({ categories = [], locale = 'fr' }) {
   return (
@@ -20,6 +21,7 @@ export default function SiteHeader({ categories = [], locale = 'fr' }) {
             <Link href="/flash" className="px-3 py-1.5 rounded-full hover:bg-white/5 transition-colors duration-220">Flash</Link>
             <Link href="/surprise-box" className="px-3 py-1.5 rounded-full hover:bg-white/5 transition-colors duration-220 hidden sm:block">Box</Link>
             <Link href="/login" className="ml-1 rounded-full px-4 py-1.5 border border-white/12 hover:border-app-accent hover:text-app-accent transition-colors duration-220">Compte</Link>
+            <CartButton />
           </nav>
         </div>
         {categories.length ? (

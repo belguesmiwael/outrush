@@ -5,6 +5,7 @@ import { localized, t } from '@/lib/i18n/dictionaries';
 import PriceReveal from '@/components/shop/PriceReveal';
 import SiteHeader from '@/components/shop/SiteHeader';
 import SiteFooter from '@/components/shop/SiteFooter';
+import AddToCartButton from '@/components/shop/AddToCartButton';
 import { formatPrice } from '@/lib/utils';
 
 export const revalidate = 120;
@@ -87,12 +88,7 @@ export default async function ProductPage({ params }) {
             <p className="text-app-muted leading-relaxed">{localized(product.description, locale)}</p>
           ) : null}
 
-          <button
-            className="w-full md:w-auto px-10 font-display font-bold py-3.5 rounded-lg bg-app-accent text-white transition-transform duration-120 ease-out-expo active:scale-[0.97] disabled:opacity-50"
-            disabled={product.quantity <= 0}
-          >
-            {product.quantity > 0 ? t(locale, 'add_to_cart') : 'Épuisé'}
-          </button>
+          <AddToCartButton product={product} className="md:w-auto md:px-12" />
 
           {product.reviews?.length ? (
             <div className="space-y-3 pt-4 border-t border-white/5">

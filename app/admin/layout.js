@@ -3,6 +3,7 @@ import Link from 'next/link';
 const NAV = [
   { href: '/admin', label: 'Tableau de bord' },
   { href: '/admin/products', label: 'Produits' },
+  { href: '/admin/orders', label: 'Commandes' },
   { href: '/admin/products/new', label: '+ Nouveau produit' },
   { href: '/ops/scan', label: 'Scanner' },
   { href: '/ops/scan/queue', label: 'File de validation' },
