@@ -7,6 +7,7 @@ import SiteHeader from '@/components/shop/SiteHeader';
 import SiteFooter from '@/components/shop/SiteFooter';
 import AddToCartButton from '@/components/shop/AddToCartButton';
 import LiveViewers from '@/components/shop/LiveViewers';
+import LiveStock from '@/components/shop/LiveStock';
 import { formatPrice } from '@/lib/utils';
 
 export const revalidate = 120;
@@ -94,15 +95,9 @@ export default async function ProductPage({ params }) {
             <p className="text-app-muted leading-relaxed">{localized(product.description, locale)}</p>
           ) : null}
 
-          {/* Signaux de conversion — données réelles */}
-          <div className="flex flex-wrap gap-2 text-xs">
-            {product.quantity > 0 && product.quantity <= 5 ? (
-              <span className="px-2.5 py-1 rounded-full bg-[color:var(--app-accent)]/15 text-app-accent font-medium pulse-last">
-                ⚡ Plus que {product.quantity} en stock
-              </span>
-            ) : product.quantity > 0 ? (
-              <span className="px-2.5 py-1 rounded-full bg-white/5 text-app-muted">En stock : {product.quantity}</span>
-            ) : null}
+          {/* Signaux de conversion — données réelles + stock live */}
+          <div className="flex flex-wrap gap-2 text-xs items-center">
+            <LiveStock productId={product.id} initial={product.quantity} />
             {soldToday > 0 ? (
               <span className="px-2.5 py-1 rounded-full bg-white/5 text-app-muted">🛒 {soldToday} vendu{soldToday > 1 ? 's' : ''} aujourd'hui</span>
             ) : null}

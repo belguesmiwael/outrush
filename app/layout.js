@@ -4,6 +4,7 @@ import { CartProvider } from '@/lib/cart/CartContext';
 import CartDrawer from '@/components/shop/CartDrawer';
 import { QuickLookProvider } from '@/lib/quicklook/QuickLookContext';
 import QuickLookModal from '@/components/shop/QuickLookModal';
+import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 
 const display = Bricolage_Grotesque({
   subsets: ['latin'],
@@ -24,6 +25,11 @@ export const metadata = {
   description:
     'Marketplace outlet mondiale : prix réels vérifiés, ventes flash chronométrées, la chasse au trésor premium.',
   manifest: '/manifest.json',
+  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'OUTRUSH' },
+  icons: {
+    icon: '/icon-192.png',
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export const viewport = {
@@ -41,6 +47,7 @@ export default function RootLayout({ children }) {
             {children}
             <CartDrawer />
             <QuickLookModal />
+            <ServiceWorkerRegister />
           </QuickLookProvider>
         </CartProvider>
       </body>

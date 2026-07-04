@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/server';
+import OrderNotifier from '@/components/admin/OrderNotifier';
 
 const NAV = [
   { href: '/admin', label: 'Tableau de bord' },
@@ -11,7 +13,13 @@ const NAV = [
   { href: '/ops/flash', label: 'Ventes Flash' },
 ];
 
-export default function AdminLayout({ children }) {
+export default async function AdminLayout({ children }) {
+  const supabase = await createClient();
+  const { count: pending } = await supabase
+    .from('orders')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'pending');
+
   return (
     <div className="min-h-dvh flex flex-col md:flex-row">
       <aside
@@ -24,6 +32,7 @@ export default function AdminLayout({ children }) {
             ADMINISTRATION
           </span>
         </Link>
+        <OrderNotifier initialPending={pending ?? 0} />
         <nav className="flex md:flex-col gap-1 overflow-x-auto">
           {NAV.map((n) => (
             <Link
