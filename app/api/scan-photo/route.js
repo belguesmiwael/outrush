@@ -59,15 +59,17 @@ export async function POST(request) {
       return NextResponse.json({ error: 'insert_failed' }, { status: 500 });
     }
 
-    // Photo dans le bucket PRIVÉ (audit) — chemin rangé dans l'enrichissement
+    // Photo dans le bucket PRIVÉ (audit) — via le client USER (RLS staff),
+    // pour ne pas dépendre de la clé service_role.
     const capturePath = `${scan.id}/${Date.now()}.${ext}`;
-    const { error: upErr } = await admin.storage
+    const { error: upErr } = await supabase.storage
       .from('scan-captures')
       .upload(capturePath, buf, { contentType: photo.type, upsert: false });
     if (upErr) {
-      return NextResponse.json({ error: 'upload_failed' }, { status: 500 });
+      console.error('scan-photo upload failed', { message: upErr.message });
+      return NextResponse.json({ error: 'upload_failed', detail: upErr.message }, { status: 500 });
     }
-    await admin
+    await supabase
       .from('scan_events')
       .update({ status: 'enriching', enrichment: { capture_path: capturePath, method: 'photo' } })
       .eq('id', scan.id);
