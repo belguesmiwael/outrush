@@ -93,7 +93,7 @@ export default async function HomePage() {
               <RotationTimer initialSeconds={rotationSeconds} />
             </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-stretch">
             {dailyRush.map((p, i) => (
               <ProductCard key={p.id} product={p} locale={locale} index={i} />
             ))}
@@ -135,9 +135,9 @@ export default async function HomePage() {
             <h2 className="font-display font-bold text-2xl">Les plus chassés</h2>
             <span className="text-sm text-app-muted">tendances en ce moment</span>
           </div>
-          <div className="flex gap-4 overflow-x-auto pb-3 snap-x">
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-3 snap-x items-stretch">
             {bestSellers.map((p, i) => (
-              <div key={p.id} className="snap-start shrink-0 w-40 sm:w-44">
+              <div key={p.id} className="snap-start shrink-0 w-44 sm:w-48 flex">
                 <ProductCard product={p} locale={locale} index={i} />
               </div>
             ))}
@@ -253,7 +253,7 @@ export default async function HomePage() {
         <h2 className="font-display font-bold text-3xl mb-2">Tout le catalogue</h2>
         <p className="text-app-muted mb-8">Prix réels vérifiés multi-sources. Remises scellées, pas promises.</p>
         {products?.length ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">
             {products.map((p, i) => (
               <ProductCard key={p.id} product={p} locale={locale} index={i} />
             ))}

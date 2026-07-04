@@ -47,7 +47,7 @@ export default async function CategoryPage({ params }) {
         <h1 className="font-display font-bold text-3xl mb-8">{localized(category.name, locale)}</h1>
 
         {products?.length ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">
             {products.map((p, i) => (
               <ProductCard key={p.id} product={p} locale={locale} index={i} />
             ))}

@@ -13,10 +13,10 @@ export default function ProductCard({ product, locale = 'fr', index = 0 }) {
   return (
     <Link
       href={`/product/${product.slug}`}
-      className="card-premium rise-in block group"
+      className="card-premium rise-in group flex flex-col h-full"
       style={{ animationDelay: `${Math.min(index * 40, 400)}ms` }}
     >
-      <div className="aspect-[4/5] bg-app-surface-2 relative overflow-hidden">
+      <div className="aspect-[4/5] bg-app-surface-2 relative overflow-hidden shrink-0">
         {imgUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -48,17 +48,17 @@ export default function ProductCard({ product, locale = 'fr', index = 0 }) {
           style={{ background: 'radial-gradient(ellipse at 50% 100%, oklch(62% 0.24 25 / 0.15), transparent 60%)' }}
         />
       </div>
-      <div className="p-4 space-y-2">
-        {product.brand ? (
-          <p className="text-xs uppercase tracking-widest text-app-muted">{product.brand}</p>
-        ) : null}
-        <h3 className="font-medium leading-snug line-clamp-2">{localized(product.title, locale)}</h3>
-        <PriceReveal
-          marketPrice={product.market_price}
-          outletPrice={product.outlet_price}
-          currency={product.currency}
-          locale={locale}
-        />
+      <div className="p-4 flex flex-col flex-1 gap-2">
+        <p className="text-xs uppercase tracking-widest text-app-muted h-4 truncate">{product.brand ?? '\u00A0'}</p>
+        <h3 className="font-medium leading-snug line-clamp-2 min-h-[2.6em]">{localized(product.title, locale)}</h3>
+        <div className="mt-auto pt-1">
+          <PriceReveal
+            marketPrice={product.market_price}
+            outletPrice={product.outlet_price}
+            currency={product.currency}
+            locale={locale}
+          />
+        </div>
       </div>
     </Link>
   );
