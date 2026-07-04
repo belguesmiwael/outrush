@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { localized } from '@/lib/i18n/dictionaries';
 import ProductCard from '@/components/shop/ProductCard';
+import SiteHeader from '@/components/shop/SiteHeader';
+import SiteFooter from '@/components/shop/SiteFooter';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,17 +37,7 @@ export default async function CategoryPage({ params }) {
 
   return (
     <main className="min-h-dvh">
-      <header className="sticky top-0 z-40 backdrop-blur-xl border-b border-white/5" style={{ background: 'oklch(16% 0.015 260 / 0.85)' }}>
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="font-display font-extrabold text-2xl tracking-tight">
-            OUT<span className="text-app-accent">RUSH</span>
-          </Link>
-          <nav className="flex items-center gap-5 text-sm">
-            <Link href="/flash" className="hover:text-app-accent transition-colors duration-120">Flash</Link>
-            <Link href="/login" className="rounded-full px-4 py-1.5 border border-white/10 hover:border-app-accent hover:text-app-accent transition-colors duration-120">Compte</Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader locale={locale} />
 
       <section className="max-w-7xl mx-auto px-4 py-10">
         <nav className="text-sm text-app-muted mb-2">
@@ -68,6 +60,7 @@ export default async function CategoryPage({ params }) {
           </div>
         )}
       </section>
+      <SiteFooter />
     </main>
   );
 }

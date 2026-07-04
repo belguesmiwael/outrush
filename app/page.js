@@ -8,6 +8,10 @@ import RotationTimer from '@/components/shop/RotationTimer';
 import LiveStockGauge from '@/components/shop/LiveStockGauge';
 import ProductCard from '@/components/shop/ProductCard';
 import PriceReveal from '@/components/shop/PriceReveal';
+import SiteHeader from '@/components/shop/SiteHeader';
+import SiteFooter from '@/components/shop/SiteFooter';
+import Hero from '@/components/shop/Hero';
+import Reveal from '@/components/shop/Reveal';
 
 export const revalidate = 60;
 
@@ -65,94 +69,9 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-dvh">
-      {/* Header */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl border-b border-white/5" style={{ background: 'oklch(16% 0.015 260 / 0.85)' }}>
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          <Link href="/" className="font-display font-extrabold text-2xl tracking-tight shrink-0">
-            OUT<span className="text-app-accent">RUSH</span>
-          </Link>
-          <div className="hidden md:flex flex-1 max-w-md">
-            <div className="w-full flex items-center gap-2 rounded-full bg-app-surface-2 border border-white/8 px-4 py-2 text-sm text-app-muted">
-              <span>🔍</span>
-              <span>Cherchez une marque, un produit…</span>
-            </div>
-          </div>
-          <nav className="flex items-center gap-5 text-sm shrink-0">
-            <Link href="/rush" className="hover:text-app-accent transition-colors duration-120">Le Flux</Link>
-            <Link href="/flash" className="hover:text-app-accent transition-colors duration-120">Flash</Link>
-            <Link href="/login" className="rounded-full px-4 py-1.5 border border-white/10 hover:border-app-accent hover:text-app-accent transition-colors duration-120">Compte</Link>
-          </nav>
-        </div>
-        {rootCategories.length ? (
-          <div className="border-t border-white/5">
-            <div className="max-w-7xl mx-auto px-4 flex gap-1 overflow-x-auto py-2 text-sm">
-              {rootCategories.map((c) => (
-                <Link
-                  key={c.id}
-                  href={`/category/${c.slug}`}
-                  className="px-3 py-1.5 rounded-full whitespace-nowrap text-app-muted hover:text-app-text hover:bg-app-surface transition-colors duration-120"
-                >
-                  {localized(c.name, locale)}
-                </Link>
-              ))}
-            </div>
-          </div>
-        ) : null}
-      </header>
+      <SiteHeader categories={rootCategories} locale={locale} />
 
-      {/* HERO éditorial — meilleure affaire du moment */}
-      {topDeal?.p ? (
-        <section className="relative overflow-hidden border-b border-white/5">
-          <div
-            className="absolute inset-0 opacity-60"
-            style={{ background: 'radial-gradient(ellipse at 30% 0%, oklch(62% 0.24 25 / 0.18), transparent 55%)' }}
-          />
-          <div className="relative max-w-7xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 gap-8 items-center">
-            <div className="space-y-5">
-              <p className="inline-flex items-center gap-2 text-app-accent uppercase tracking-[0.25em] text-xs font-bold">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-app-accent opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-app-accent" />
-                </span>
-                L'affaire du moment
-              </p>
-              <h1 className="font-display font-extrabold text-4xl md:text-5xl leading-[1.05]">
-                L'outlet mondial,{' '}
-                <span className="text-app-accent">chronométré.</span>
-              </h1>
-              <p className="text-app-muted max-w-md">
-                Invendus et fins de série de grandes marques — beauté, mode, tech, maison.
-                Prix réels vérifiés, remises scellées.
-              </p>
-              <div className="flex items-center gap-3 pt-2">
-                <Link
-                  href={`/product/${topDeal.p.slug}`}
-                  className="rounded-xl px-6 py-3 font-display font-bold bg-app-accent text-white transition-transform duration-[220ms] hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  Voir l'affaire {topDeal.pct ? `· −${topDeal.pct}%` : ''}
-                </Link>
-                <Link href="/flash" className="rounded-xl px-6 py-3 border border-white/10 hover:bg-app-surface transition-colors duration-120">
-                  Les ventes flash
-                </Link>
-              </div>
-            </div>
-            <Link href={`/product/${topDeal.p.slug}`} className="block group">
-              <div className="card-hunt overflow-hidden aspect-[4/3]">
-                {(topDeal.p.images ?? [])[0] ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-media/${topDeal.p.images[0]}`}
-                    alt={localized(topDeal.p.title, locale)}
-                    className="w-full h-full object-cover transition-transform duration-[600ms] group-hover:scale-[1.03]"
-                  />
-                ) : (
-                  <div className="w-full h-full grid place-items-center font-display text-7xl text-app-accent opacity-30">O</div>
-                )}
-              </div>
-            </Link>
-          </div>
-        </section>
-      ) : null}
+      <Hero product={topDeal?.p ?? null} pct={topDeal?.pct ?? 0} locale={locale} />
 
       {/* DAILY RUSH — le flux qui disparaît */}
       {dailyRush.length ? (
@@ -350,12 +269,7 @@ export default async function HomePage() {
         )}
       </section>
 
-      <footer className="border-t border-white/5 mt-10">
-        <div className="max-w-7xl mx-auto px-4 py-8 text-sm text-app-muted flex flex-wrap gap-6 justify-between">
-          <p>© {new Date().getFullYear()} OUTRUSH — l'outlet mondial, chronométré.</p>
-          <p>FR · EN · AR — multi-devises</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }

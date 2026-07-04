@@ -167,3 +167,126 @@ h1, h2, h3, .display { font-family: var(--app-font-display), var(--app-font-body
 }
 .pulse-last { animation: pulseLast 1.6s cubic-bezier(0.16,1,0.3,1) infinite; }
 @media (prefers-reduced-motion: reduce) { .pulse-last { animation: none; } }
+
+/* ═══════════════════════════════════════════════════════
+   OBSIDIAN RUSH — couche design premium (refonte)
+   ═══════════════════════════════════════════════════════ */
+
+/* Fond enrichi : carbone + double halo chaud vivant */
+body {
+  background-color: oklch(14% 0.012 264);
+  background-image:
+    radial-gradient(ellipse 70% 55% at 15% -5%, oklch(62% 0.24 25 / 0.10), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 10%, oklch(55% 0.12 300 / 0.06), transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+}
+
+/* Verre — surcouche uniquement */
+.glass {
+  background: oklch(21% 0.015 264 / 0.55);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  border: 1px solid oklch(100% 0 0 / 0.06);
+}
+
+/* Titrage éditorial — contraste display fort */
+.display-hero {
+  font-family: var(--app-font-display), sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.94;
+}
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--app-accent);
+}
+
+/* Entrées au scroll — fondu-montée subtil */
+@keyframes reveal-up {
+  0%   { opacity: 0; transform: translateY(22px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.reveal {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+.reveal.in {
+  animation: reveal-up 0.7s var(--ease-out-expo) both;
+}
+
+/* Flottement doux (spotlight hero) */
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+.float-soft { animation: float-soft 6s ease-in-out infinite; }
+
+/* Halo vivant qui respire derrière un produit vedette */
+@keyframes breathe {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%      { opacity: 0.85; transform: scale(1.06); }
+}
+.halo-live { animation: breathe 7s ease-in-out infinite; }
+
+/* Carte produit premium — profondeur + zoom image contenu */
+.card-premium {
+  position: relative;
+  background: linear-gradient(160deg, oklch(22% 0.014 264), oklch(19% 0.014 264));
+  border: 1px solid oklch(100% 0 0 / 0.05);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--el-2);
+  transition: transform 0.4s var(--ease-out-expo),
+              box-shadow 0.4s var(--ease-out-expo),
+              border-color 0.4s var(--ease-out-expo);
+}
+.card-premium:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--el-5);
+  border-color: oklch(62% 0.24 25 / 0.35);
+}
+.card-premium .media-zoom {
+  transition: transform 0.7s var(--ease-out-expo);
+}
+.card-premium:hover .media-zoom { transform: scale(1.06); }
+
+/* Ligne accent qui se révèle sous les titres de section */
+.rule-accent {
+  height: 2px; width: 48px;
+  background: linear-gradient(90deg, var(--app-accent), transparent);
+  border-radius: 2px;
+}
+
+/* Bouton primaire signature */
+.btn-rush {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-family: var(--app-font-display); font-weight: 700;
+  background: var(--app-accent); color: white;
+  border-radius: 12px; padding: 0.875rem 1.75rem;
+  box-shadow: 0 4px 16px oklch(62% 0.24 25 / 0.35), inset 0 1px 0 oklch(100% 0 0 / 0.2);
+  transition: transform 0.22s var(--ease-out-expo), box-shadow 0.22s var(--ease-out-expo);
+}
+.btn-rush:hover { transform: translateY(-2px); box-shadow: 0 8px 28px oklch(62% 0.24 25 / 0.45), inset 0 1px 0 oklch(100% 0 0 / 0.25); }
+.btn-rush:active { transform: translateY(0) scale(0.98); }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  border: 1px solid oklch(100% 0 0 / 0.12); border-radius: 12px;
+  padding: 0.875rem 1.5rem; color: var(--app-text);
+  transition: border-color 0.22s var(--ease-out-expo), background 0.22s var(--ease-out-expo);
+}
+.btn-ghost:hover { border-color: oklch(62% 0.24 25 / 0.5); background: oklch(62% 0.24 25 / 0.06); }
+
+/* Marquee défilant (bandeau valeurs) */
+@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+.marquee-track { display: flex; width: max-content; animation: marquee 30s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
+
+/* Masquer scrollbar (feed) */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

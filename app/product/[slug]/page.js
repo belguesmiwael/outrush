@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { localized, t } from '@/lib/i18n/dictionaries';
 import PriceReveal from '@/components/shop/PriceReveal';
+import SiteHeader from '@/components/shop/SiteHeader';
+import SiteFooter from '@/components/shop/SiteFooter';
 import { formatPrice } from '@/lib/utils';
 
 export const revalidate = 120;
@@ -29,10 +31,12 @@ export default async function ProductPage({ params }) {
   const sources = Array.isArray(product.market_sources) ? product.market_sources : [];
 
   return (
-    <main className="min-h-dvh max-w-6xl mx-auto px-4 py-8">
-      <Link href="/" className="text-sm text-app-muted hover:text-app-text transition-colors duration-120">
-        ← OUTRUSH
-      </Link>
+    <>
+      <SiteHeader locale={locale} />
+      <main className="min-h-dvh max-w-6xl mx-auto px-4 py-8">
+        <Link href="/" className="text-sm text-app-muted hover:text-app-text transition-colors duration-120">
+          ← OUTRUSH
+        </Link>
       <div className="grid md:grid-cols-2 gap-10 mt-6">
         <div className="card-hunt overflow-hidden aspect-[4/5] bg-app-surface-2">
           {mainImg ? (
@@ -103,6 +107,8 @@ export default async function ProductPage({ params }) {
           ) : null}
         </div>
       </div>
-    </main>
+      </main>
+      <SiteFooter />
+    </>
   );
 }

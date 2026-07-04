@@ -13,7 +13,7 @@ export default function ProductCard({ product, locale = 'fr', index = 0 }) {
   return (
     <Link
       href={`/product/${product.slug}`}
-      className="card-hunt rise-in block overflow-hidden group"
+      className="card-premium rise-in block group"
       style={{ animationDelay: `${Math.min(index * 40, 400)}ms` }}
     >
       <div className="aspect-[4/5] bg-app-surface-2 relative overflow-hidden">
@@ -22,7 +22,7 @@ export default function ProductCard({ product, locale = 'fr', index = 0 }) {
           <img
             src={imgUrl}
             alt={localized(product.title, locale)}
-            className="w-full h-full object-cover transition-transform duration-380 ease-out-expo group-hover:scale-[1.04]"
+            className="media-zoom w-full h-full object-cover"
             loading="lazy"
           />
         ) : (
