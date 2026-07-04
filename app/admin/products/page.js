@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { setProductStatus, deleteProduct, applyPhotoStudio } from '@/lib/actions/admin-products';
+import { setProductStatus, deleteProduct, applyPhotoStudio, enrichGallery } from '@/lib/actions/admin-products';
 import { localized } from '@/lib/i18n/dictionaries';
 import { formatPrice, discountPct } from '@/lib/utils';
 
@@ -25,7 +25,7 @@ export default async function AdminProductsPage({ searchParams }) {
 
   let query = supabase
     .from('products')
-    .select('id, slug, title, brand, images, market_price, outlet_price, currency, quantity, status, stock_class, created_at')
+    .select('id, slug, title, brand, images, market_price, outlet_price, currency, quantity, status, stock_class, gtin, created_at')
     .order('created_at', { ascending: false })
     .limit(200);
   if (status) query = query.eq('status', status);
@@ -135,6 +135,17 @@ export default async function AdminProductsPage({ searchParams }) {
                         title="Studio photo : détourage + mise en scène pro"
                       >
                         ✨ Studio
+                      </button>
+                    </form>
+                  ) : null}
+                  {p.gtin ? (
+                    <form action={enrichGallery}>
+                      <input type="hidden" name="productId" value={p.id} />
+                      <button
+                        className="text-xs px-2.5 py-1.5 rounded-lg border border-white/10 hover:bg-app-surface transition-colors duration-120"
+                        title="Télécharger les images officielles du produit (via GTIN)"
+                      >
+                        🖼 Galerie
                       </button>
                     </form>
                   ) : null}

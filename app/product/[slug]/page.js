@@ -8,13 +8,14 @@ import SiteFooter from '@/components/shop/SiteFooter';
 import AddToCartButton from '@/components/shop/AddToCartButton';
 import LiveViewers from '@/components/shop/LiveViewers';
 import LiveStock from '@/components/shop/LiveStock';
+import ProductGallery from '@/components/shop/ProductGallery';
 import { formatPrice } from '@/lib/utils';
 
 export const revalidate = 120;
 
 export default async function ProductPage({ params }) {
   const { slug } = await params;
-  if (!/^[a-z0-9-]{1,80}$/.test(slug)) notFound();
+  if (!/^[a-z0-9-]{1,120}$/.test(slug)) notFound();
 
   const locale = 'fr';
   const supabase = await createClient();
@@ -46,14 +47,7 @@ export default async function ProductPage({ params }) {
           ← OUTRUSH
         </Link>
       <div className="grid md:grid-cols-2 gap-10 mt-6">
-        <div className="card-hunt overflow-hidden aspect-[4/5] bg-app-surface-2">
-          {mainImg ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={mainImg} alt={localized(product.title, locale)} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full grid place-items-center text-app-muted font-display text-6xl">O</div>
-          )}
-        </div>
+        <ProductGallery images={images} alt={localized(product.title, locale)} />
 
         <div className="space-y-6">
           {product.brand ? (
@@ -93,6 +87,36 @@ export default async function ProductPage({ params }) {
 
           {product.description ? (
             <p className="text-app-muted leading-relaxed">{localized(product.description, locale)}</p>
+          ) : null}
+
+          {/* Points forts */}
+          {product.specs?._highlights?.[locale]?.length ? (
+            <ul className="space-y-1.5">
+              {product.specs._highlights[locale].map((h, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm">
+                  <span className="text-app-accent mt-0.5">✓</span>
+                  <span>{h}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          {/* Caractéristiques */}
+          {product.specs && Object.keys(product.specs).filter((k) => k !== '_highlights').length ? (
+            <div className="border border-white/5 rounded-xl overflow-hidden">
+              <p className="px-4 py-2.5 text-xs uppercase tracking-widest text-app-muted bg-white/[0.03]">Caractéristiques</p>
+              <dl className="divide-y divide-white/5">
+                {Object.entries(product.specs)
+                  .filter(([k]) => k !== '_highlights')
+                  .slice(0, 10)
+                  .map(([k, v]) => (
+                    <div key={k} className="px-4 py-2 flex justify-between gap-4 text-sm">
+                      <dt className="text-app-muted capitalize">{k}</dt>
+                      <dd className="text-right">{String(v)}</dd>
+                    </div>
+                  ))}
+              </dl>
+            </div>
           ) : null}
 
           {/* Signaux de conversion — données réelles + stock live */}
