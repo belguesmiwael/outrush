@@ -15,7 +15,15 @@ export function ProductSelectProvider({ children }) {
   });
   const clear = () => setSelected(new Set());
 
-
+  function removeSelected() {
+    if (!selected.size) return;
+    if (!confirm(`Supprimer ${selected.size} produit(s) ?`)) return;
+    start(async () => {
+      const res = await deleteProductsBulk([...selected]);
+      if (res?.ok === false) alert('Suppression impossible : ' + (res.detail ?? res.error));
+      clear();
+    });
+  }
 
   return (
     <SelectContext.Provider value={{ selected, toggle, clear, removeSelected, pending }}>
