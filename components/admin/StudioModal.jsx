@@ -15,6 +15,7 @@ function mediaUrl(path) {
 export default function StudioModal({ product, onClose }) {
   const [style, setStyle] = useState('velvet');
   const [preview, setPreview] = useState(null);
+  const [note, setNote] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -22,13 +23,13 @@ export default function StudioModal({ product, onClose }) {
   const original = mediaUrl((product.images ?? [])[0]);
 
   async function generate() {
-    setLoading(true); setError(null); setPreview(null);
+    setLoading(true); setError(null); setPreview(null); setNote(null);
     try {
       const fd = new FormData();
       fd.set('productId', product.id);
       fd.set('style', style);
       const res = await generateStudioPreview(fd);
-      if (res?.ok) setPreview(res.dataUrl);
+      if (res?.ok) { setPreview(res.dataUrl); setNote(res.note ?? null); }
       else setError(res?.detail ?? res?.error ?? 'Échec de la génération');
     } catch {
       setError('Erreur serveur');
@@ -104,6 +105,7 @@ export default function StudioModal({ product, onClose }) {
         </div>
 
         {error ? <p className="text-app-accent text-sm">{error}</p> : null}
+        {note ? <p className="text-app-loot text-xs">{note}</p> : null}
 
         <div className="flex items-center gap-3">
           <button onClick={generate} disabled={loading || saving} className="btn-ghost disabled:opacity-50">
