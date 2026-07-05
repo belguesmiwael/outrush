@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { localized, t } from '@/lib/i18n/dictionaries';
 import Countdown from '@/components/shop/Countdown';
 import LiveStockGauge from '@/components/shop/LiveStockGauge';
-import PriceReveal from '@/components/shop/PriceReveal';
+import Money from '@/components/shop/Money';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,17 +38,58 @@ export default async function FlashPage() {
               <Countdown endsAt={sale.ends_at} serverNow={serverNow} className="text-6xl text-app-accent" />
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {(sale.flash_sale_items ?? []).filter((i) => i.product).map((item, idx) => (
-                <Link key={item.id} href={`/product/${item.product.slug}`}
-                  className="card-hunt rise-in p-4 space-y-3" style={{ animationDelay: `${idx * 50}ms` }}>
-                  <p className="font-medium text-sm line-clamp-2">{localized(item.product.title, locale)}</p>
-                  <PriceReveal marketPrice={item.product.market_price} outletPrice={item.flash_price}
-                    currency={item.product.currency} locale={locale} />
-                  <LiveStockGauge itemId={item.id} allocated={item.allocated_qty}
-                    initialRemaining={item.remaining_qty}
-                    label={{ lastPiece: t(locale, 'last_piece'), left: t(locale, 'stock_left') }} />
-                </Link>
-              ))}
+              {(sale.flash_sale_items ?? []).filter((i) => i.product).map((item, idx) => {
+                const img = (item.product.images ?? [])[0];
+                const imgUrl = img
+                  ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-media/${img}`
+                  : null;
+                const pct = item.product.market_price
+                  ? Math.round((1 - item.flash_price / item.product.market_price) * 100)
+                  : null;
+                return (
+                  <Link key={item.id} href={`/product/${item.product.slug}`}
+                    className="card-premium rise-in group flex flex-col overflow-hidden" style={{ animationDelay: `${idx * 50}ms` }}>
+                    {/* Image plein cadre + halo de chaleur */}
+                    <div className="relative aspect-product overflow-hidden bg-app-surface-2">
+                      <div className="absolute inset-0 opacity-70 pointer-events-none"
+                        style={{ background: 'radial-gradient(ellipse 70% 60% at 50% 40%, oklch(62% 0.24 25 / 0.18), transparent 70%)' }} />
+                      {imgUrl ? (
+                        <img src={imgUrl} alt={localized(item.product.title, locale)}
+                          loading="lazy"
+                          className="relative w-full h-full object-contain p-3 transition-transform duration-[600ms] ease-out-expo group-hover:scale-105" />
+                      ) : (
+                        <div className="w-full h-full grid place-items-center text-app-muted font-display text-4xl select-none">O</div>
+                      )}
+                      {/* Sceau remise laiton, en haut à droite */}
+                      {pct !== null ? (
+                        <span className="absolute top-2 right-2 seal text-xs">−{pct}%</span>
+                      ) : null}
+                      {/* Marqueur flash pulsant, en haut à gauche */}
+                      <span className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-black/50 backdrop-blur text-app-accent">
+                        <span className="w-1.5 h-1.5 rounded-full bg-app-accent pulse-last" /> Flash
+                      </span>
+                    </div>
+                    {/* Infos */}
+                    <div className="p-3.5 flex flex-col gap-2.5 flex-1">
+                      {item.product.brand ? (
+                        <p className="text-[10px] uppercase tracking-widest text-app-muted truncate">{item.product.brand}</p>
+                      ) : null}
+                      <p className="font-medium text-sm leading-snug line-clamp-2 min-h-[2.4em]">{localized(item.product.title, locale)}</p>
+                      <div className="mt-auto space-y-2">
+                        <div className="flex items-baseline gap-2 flex-wrap">
+                          {item.product.market_price ? (
+                            <s className="num text-app-muted text-xs"><Money amount={item.product.market_price} /></s>
+                          ) : null}
+                          <span className="num-tension text-lg font-semibold"><Money amount={item.flash_price} /></span>
+                        </div>
+                        <LiveStockGauge itemId={item.id} allocated={item.allocated_qty}
+                          initialRemaining={item.remaining_qty}
+                          label={{ lastPiece: t(locale, 'last_piece'), left: t(locale, 'stock_left') }} />
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </section>
         ))
