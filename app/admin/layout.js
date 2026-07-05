@@ -9,7 +9,7 @@ const NAV = [
   { href: '/admin/orders', label: 'Commandes' },
   { href: '/admin/products/new', label: '+ Nouveau produit' },
   { href: '/ops/stock', label: 'Stock Intelligence' },
-  { href: '/ops/flash', label: 'Ventes Flash' },
+  { href: '/admin/flash', label: 'Ventes Flash' },
   { href: '/admin/settings', label: 'Réglages' },
 ];
 
