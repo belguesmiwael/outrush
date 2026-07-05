@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Search, User } from 'lucide-react';
 import { localized } from '@/lib/i18n/dictionaries';
 import CartButton from './CartButton';
 
@@ -18,18 +19,18 @@ export default function SiteHeader({ categories = [], locale = 'fr' }) {
           </Link>
           <div className="hidden md:flex flex-1 max-w-md">
             <Link href="/shop" className="w-full flex items-center gap-2 rounded-full bg-white/5 border border-white/8 px-4 py-2 text-sm text-app-muted hover:border-white/15 transition-colors duration-220">
-              <span className="opacity-60">⌕</span>
+              <Search size={16} strokeWidth={2} className="opacity-60" />
               <span>Cherchez une marque, un produit…</span>
             </Link>
           </div>
           <nav className="flex items-center gap-1 shrink-0" style={{ fontFamily: 'var(--app-font-mono)', fontSize: '0.75rem', letterSpacing: '0.02em' }}>
-            <Link href="/shop" aria-label="Rechercher" className="md:hidden w-9 h-9 grid place-items-center rounded-full hover:bg-white/5 transition-colors duration-220 text-lg">⌕</Link>
+            <Link href="/shop" aria-label="Rechercher" className="md:hidden w-9 h-9 grid place-items-center rounded-full hover:bg-white/5 transition-colors duration-220 "><Search size={18} strokeWidth={2} /></Link>
             <Link href="/shop" className="hidden md:block px-3 py-1.5 rounded-full hover:bg-white/5 transition-colors duration-220">Boutique</Link>
             <Link href="/rush" className="hidden md:block px-3 py-1.5 rounded-full hover:bg-white/5 transition-colors duration-220">Le Flux</Link>
             <Link href="/flash" className="px-3 py-1.5 rounded-full hover:bg-white/5 transition-colors duration-220 text-app-accent">Flash</Link>
             <Link href="/surprise-box" className="hidden md:block px-3 py-1.5 rounded-full hover:bg-white/5 transition-colors duration-220">Box</Link>
             <Link href="/login" aria-label="Compte" className="w-9 h-9 md:w-auto md:h-auto grid place-items-center md:px-4 md:py-1.5 rounded-full md:border md:border-white/12 hover:border-app-accent hover:text-app-accent transition-colors duration-220">
-              <span className="md:hidden text-lg">◔</span><span className="hidden md:inline">Compte</span>
+              <span className="md:hidden"><User size={18} strokeWidth={2} /></span><span className="hidden md:inline">Compte</span>
             </Link>
             <CartButton />
           </nav>

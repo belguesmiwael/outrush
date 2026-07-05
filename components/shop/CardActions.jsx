@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { Eye, ShoppingBag, Check } from 'lucide-react';
 import { useCart } from '@/lib/cart/CartContext';
 import { useQuickLook } from '@/lib/quicklook/QuickLookContext';
 
@@ -33,9 +34,9 @@ export default function CardActions({ product, quickLookPos = 'top-right' }) {
       {/* Quick look — apparaît au survol de l'image */}
       <button
         onClick={onQuickLook}
-        className={`absolute ${qlCls} z-20 rounded-full glass px-3 py-1.5 text-xs font-medium opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-220 ease-out-expo`}
+        className={`absolute ${qlCls} z-20 rounded-full glass px-3 py-1.5 text-xs font-medium opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-220 ease-out-expo inline-flex items-center gap-1.5`}
       >
-        👁 Aperçu
+        <Eye size={14} strokeWidth={2} /> Aperçu
       </button>
 
       {/* Badge quantité déjà au panier */}
@@ -50,13 +51,13 @@ export default function CardActions({ product, quickLookPos = 'top-right' }) {
         <button
           onClick={onAdd}
           disabled={soldOut}
-          className={`w-full rounded-lg py-2 text-sm font-display font-bold transition-transform duration-120 active:scale-95 ${
+          className={`w-full rounded-lg py-2 text-sm font-display font-bold transition-transform duration-120 active:scale-95 inline-flex items-center justify-center gap-1.5 ${
             soldOut
               ? 'bg-black/60 text-white/50 cursor-not-allowed'
               : 'bg-app-accent text-white'
           } ${pulse ? 'scale-105' : ''}`}
         >
-          {soldOut ? 'Épuisé' : pulse ? '✓ Ajouté' : '+ Panier'}
+          {soldOut ? 'Épuisé' : pulse ? <><Check size={15} strokeWidth={2.5} /> Ajouté</> : <><ShoppingBag size={15} strokeWidth={2} /> Panier</>}
         </button>
       </div>
     </>

@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { ShoppingBag, Check } from 'lucide-react';
 
 /**
  * Affiche en temps réel la pression panier ("X au panier") et les ventes 24h.
@@ -50,12 +51,12 @@ export default function LiveCartPressure({ productId, initialInCarts = 0, initia
     <div className="flex items-center gap-2 flex-wrap text-sm">
       {inCarts > 0 ? (
         <span className="px-2.5 py-1 rounded-full bg-[color:var(--app-accent)]/12 text-app-accent">
-          🛒 <span className="num">{inCarts}</span> au panier maintenant
+          <ShoppingBag size={13} strokeWidth={2} className="inline -mt-0.5 mr-1" /><span className="num">{inCarts}</span> au panier maintenant
         </span>
       ) : null}
       {sold > 0 ? (
         <span className="px-2.5 py-1 rounded-full bg-white/5 text-app-muted">
-          ✓ <span className="num">{sold}</span> vendu{sold > 1 ? 's' : ''} · 24h
+          <Check size={13} strokeWidth={2.5} className="inline -mt-0.5 mr-1" /><span className="num">{sold}</span> vendu{sold > 1 ? 's' : ''} · 24h
         </span>
       ) : null}
     </div>

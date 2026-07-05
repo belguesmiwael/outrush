@@ -3,6 +3,7 @@ import { localized } from '@/lib/i18n/dictionaries';
 import { scarcity } from '@/lib/rush/daily';
 import PriceReveal from './PriceReveal';
 import FlashBadge from './FlashBadge';
+import { Flame, ShoppingBag } from 'lucide-react';
 import CardActions from './CardActions';
 
 export default function ProductCard({ product, locale = 'fr', index = 0, sold = 0 }) {
@@ -51,7 +52,7 @@ export default function ProductCard({ product, locale = 'fr', index = 0, sold = 
           ) : null}
           {trending ? (
             <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-black/60 backdrop-blur text-app-accent">
-              🔥 Tendance
+              <Flame size={11} strokeWidth={2.5} className="inline -mt-0.5" /> Tendance
             </span>
           ) : null}
         </div>
@@ -79,7 +80,7 @@ export default function ProductCard({ product, locale = 'fr', index = 0, sold = 
             locale={locale}
           />
           {sold > 0 ? (
-            <p className="text-[11px] text-app-muted">🛒 <span className="num">{sold}</span> vendu{sold > 1 ? 's' : ''} aujourd'hui</p>
+            <p className="text-[11px] text-app-muted"><ShoppingBag size={12} strokeWidth={2} className="inline -mt-0.5 mr-1" /><span className="num">{sold}</span> vendu{sold > 1 ? 's' : ''} aujourd'hui</p>
           ) : null}
         </div>
       </div>

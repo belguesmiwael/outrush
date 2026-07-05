@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useCart } from '@/lib/cart/CartContext';
+import { Check, ShoppingBag } from 'lucide-react';
 
 export default function AddToCartButton({ product, className = '', label = 'Ajouter au panier' }) {
   const { add } = useCart();
@@ -25,7 +26,7 @@ export default function AddToCartButton({ product, className = '', label = 'Ajou
 
   return (
     <button onClick={onAdd} className={`btn-rush w-full ${className}`}>
-      {added ? '✓ Ajouté au panier' : label}
+      {added ? <span className="inline-flex items-center gap-1.5"><Check size={16} strokeWidth={2.5} /> Ajouté au panier</span> : <span className="inline-flex items-center gap-1.5"><ShoppingBag size={16} strokeWidth={2} /> {label}</span>}
     </button>
   );
 }

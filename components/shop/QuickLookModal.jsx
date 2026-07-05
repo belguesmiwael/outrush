@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { X, Eye, Check, ShoppingBag } from 'lucide-react';
 import { useQuickLook } from '@/lib/quicklook/QuickLookContext';
 import { useCart } from '@/lib/cart/CartContext';
 import { localized } from '@/lib/i18n/dictionaries';
@@ -38,7 +39,7 @@ export default function QuickLookModal() {
     <div className="fixed inset-0 z-[70] grid place-items-center p-4" role="dialog">
       <div onClick={close} className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-[reveal-up_0.2s_ease]" />
       <div className="relative w-full max-w-3xl max-h-[88dvh] overflow-y-auto card-premium rise-in in">
-        <button onClick={close} className="absolute top-3 right-3 z-10 w-9 h-9 grid place-items-center rounded-full glass text-xl leading-none">×</button>
+        <button onClick={close} className="absolute top-3 right-3 z-10 w-9 h-9 grid place-items-center rounded-full glass text-xl leading-none"><X size={18} strokeWidth={2} /></button>
 
         <div className="grid md:grid-cols-2">
           {/* Image */}
@@ -71,7 +72,7 @@ export default function QuickLookModal() {
             {/* Signaux */}
             <div className="flex flex-wrap gap-2 text-xs">
               {rare ? <span className="px-2.5 py-1 rounded-full bg-[color:var(--app-accent)]/15 text-app-accent font-medium">{rare.label}</span> : null}
-              {product.views > 0 ? <span className="px-2.5 py-1 rounded-full bg-white/5 text-app-muted">👁 {product.views} vues</span> : null}
+              {product.views > 0 ? <span className="px-2.5 py-1 rounded-full bg-white/5 text-app-muted"><span className="inline-flex items-center gap-1"><Eye size={13} strokeWidth={2} /> {product.views} vues</span></span> : null}
               <LiveViewers productId={product.id} />
             </div>
 
@@ -84,7 +85,7 @@ export default function QuickLookModal() {
                   <button onClick={() => setQty((q) => Math.min(product.quantity ?? 99, q + 1))} className="px-3 py-2 text-app-muted hover:text-app-text">+</button>
                 </div>
                 <button onClick={onAdd} className="btn-rush flex-1">
-                  {added ? '✓ Ajouté' : inCart ? `Ajouter (${inCart} au panier)` : 'Ajouter au panier'}
+                  {added ? <span className='inline-flex items-center gap-1.5'><Check size={16} strokeWidth={2.5}/> Ajouté</span> : inCart ? `Ajouter (${inCart} au panier)` : 'Ajouter au panier'}
                 </button>
               </div>
             ) : (

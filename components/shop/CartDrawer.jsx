@@ -1,4 +1,5 @@
 'use client';
+import { X, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { useCart } from '@/lib/cart/CartContext';
 import Money from './Money';
@@ -25,13 +26,13 @@ export default function CartDrawer() {
       >
         <div className="flex items-center justify-between p-5 border-b border-white/5">
           <h2 className="font-display font-bold text-lg">Votre panier {count ? `(${count})` : ''}</h2>
-          <button onClick={() => setOpen(false)} className="text-app-muted hover:text-app-text text-2xl leading-none">×</button>
+          <button onClick={() => setOpen(false)} className="text-app-muted hover:text-app-text leading-none"><X size={22} strokeWidth={2} /></button>
         </div>
 
         {items.length === 0 ? (
           <div className="flex-1 grid place-items-center p-8 text-center">
             <div className="space-y-3">
-              <div className="text-5xl opacity-30">🛒</div>
+              <div className="opacity-30 flex justify-center"><ShoppingBag size={48} strokeWidth={1.5} /></div>
               <p className="text-app-muted">Votre panier est vide.</p>
               <button onClick={() => setOpen(false)} className="btn-ghost">Continuer la chasse</button>
             </div>
