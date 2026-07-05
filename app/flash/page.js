@@ -11,12 +11,16 @@ export default async function FlashPage() {
   const locale = 'fr';
   const supabase = await createClient();
   const serverNow = new Date().toISOString();
-  const { data: sales } = await supabase
+  // Un drop est visible s'il est dans sa fenêtre horaire, OU marqué 'live' manuellement
+  const { data: allSales } = await supabase
     .from('flash_sales')
-    .select('id, title, ends_at, starts_at, flash_sale_items(id, flash_price, allocated_qty, remaining_qty, product:products(slug, title, brand, images, market_price, outlet_price, currency))')
-    .lte('starts_at', serverNow)
+    .select('id, title, ends_at, starts_at, status, flash_sale_items(id, flash_price, allocated_qty, remaining_qty, product:products(slug, title, brand, images, market_price, outlet_price, currency))')
+    .in('status', ['live', 'scheduled'])
     .gte('ends_at', serverNow)
     .order('ends_at', { ascending: true });
+  const sales = (allSales ?? []).filter(
+    (s) => s.status === 'live' || (s.starts_at <= serverNow && s.ends_at >= serverNow)
+  );
 
   return (
     <main className="min-h-dvh max-w-7xl mx-auto px-4 py-8 space-y-10">
