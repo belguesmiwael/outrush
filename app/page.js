@@ -5,6 +5,7 @@ import { formatPrice, discountPct } from '@/lib/utils';
 import Money from '@/components/shop/Money';
 import { pickDailyRush, secondsUntilRotation } from '@/lib/rush/daily';
 import Countdown from '@/components/shop/Countdown';
+import FlashCard from '@/components/shop/FlashCard';
 import RotationTimer from '@/components/shop/RotationTimer';
 import LiveStockGauge from '@/components/shop/LiveStockGauge';
 import ProductCard from '@/components/shop/ProductCard';
@@ -106,27 +107,10 @@ export default async function HomePage() {
                 <Countdown endsAt={flash.ends_at} serverNow={serverNow} className="text-2xl text-app-text" />
               </div>
             </div>
-            <div className="flex gap-4 overflow-x-auto pb-3 snap-x">
+            <div className="flex gap-4 overflow-x-auto no-scrollbar pb-3 snap-x">
               {(flash.flash_sale_items ?? []).filter((i) => i.product).map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/product/${item.product.slug}`}
-                  className="card-hunt snap-start shrink-0 w-56 p-4 space-y-3"
-                >
-                  <p className="font-medium line-clamp-2 text-sm">{localized(item.product.title, locale)}</p>
-                  <PriceReveal
-                    marketPrice={item.product.market_price}
-                    outletPrice={item.flash_price}
-                    currency={item.product.currency}
-                    locale={locale}
-                  />
-                  <LiveStockGauge
-                    itemId={item.id}
-                    allocated={item.allocated_qty}
-                    initialRemaining={item.remaining_qty}
-                    label={{ lastPiece: t(locale, 'last_piece'), left: t(locale, 'stock_left') }}
-                  />
-                </Link>
+                <FlashCard key={item.id} item={item} locale={locale} variant="rail"
+                  labels={{ lastPiece: t(locale, 'last_piece'), left: t(locale, 'stock_left') }} />
               ))}
             </div>
           </div>
