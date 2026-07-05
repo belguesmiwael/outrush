@@ -87,6 +87,51 @@ export default async function HomePage() {
         locale={locale}
       />
 
+      {flash ? (
+        <section className="border-b border-white/5" style={{ background: 'linear-gradient(180deg, oklch(62% 0.24 25 / 0.08), transparent)' }}>
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <div className="flex items-center justify-between gap-4 mb-4">
+              <div className="flex items-center gap-3">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-app-accent opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-app-accent" />
+                </span>
+                <h2 className="font-display font-bold text-app-accent uppercase tracking-widest text-sm">
+                  {t(locale, 'flash_now')} — {localized(flash.title, locale)}
+                </h2>
+              </div>
+              <div className="flex items-baseline gap-2 text-app-muted text-sm">
+                <span>{t(locale, 'ends_in')}</span>
+                <Countdown endsAt={flash.ends_at} serverNow={serverNow} className="text-2xl text-app-text" />
+              </div>
+            </div>
+            <div className="flex gap-4 overflow-x-auto pb-3 snap-x">
+              {(flash.flash_sale_items ?? []).filter((i) => i.product).map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/product/${item.product.slug}`}
+                  className="card-hunt snap-start shrink-0 w-56 p-4 space-y-3"
+                >
+                  <p className="font-medium line-clamp-2 text-sm">{localized(item.product.title, locale)}</p>
+                  <PriceReveal
+                    marketPrice={item.product.market_price}
+                    outletPrice={item.flash_price}
+                    currency={item.product.currency}
+                    locale={locale}
+                  />
+                  <LiveStockGauge
+                    itemId={item.id}
+                    allocated={item.allocated_qty}
+                    initialRemaining={item.remaining_qty}
+                    label={{ lastPiece: t(locale, 'last_piece'), left: t(locale, 'stock_left') }}
+                  />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       {/* DAILY RUSH — le flux qui disparaît */}
       {dailyRush.length ? (
         <section className="max-w-7xl mx-auto px-4 pt-10">
@@ -155,50 +200,6 @@ export default async function HomePage() {
       ) : null}
 
       {/* Rail FLASH */}
-      {flash ? (
-        <section className="border-b border-white/5" style={{ background: 'linear-gradient(180deg, oklch(62% 0.24 25 / 0.08), transparent)' }}>
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <div className="flex items-center justify-between gap-4 mb-4">
-              <div className="flex items-center gap-3">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-app-accent opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-app-accent" />
-                </span>
-                <h2 className="font-display font-bold text-app-accent uppercase tracking-widest text-sm">
-                  {t(locale, 'flash_now')} — {localized(flash.title, locale)}
-                </h2>
-              </div>
-              <div className="flex items-baseline gap-2 text-app-muted text-sm">
-                <span>{t(locale, 'ends_in')}</span>
-                <Countdown endsAt={flash.ends_at} serverNow={serverNow} className="text-2xl text-app-text" />
-              </div>
-            </div>
-            <div className="flex gap-4 overflow-x-auto pb-3 snap-x">
-              {(flash.flash_sale_items ?? []).filter((i) => i.product).map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/product/${item.product.slug}`}
-                  className="card-hunt snap-start shrink-0 w-56 p-4 space-y-3"
-                >
-                  <p className="font-medium line-clamp-2 text-sm">{localized(item.product.title, locale)}</p>
-                  <PriceReveal
-                    marketPrice={item.product.market_price}
-                    outletPrice={item.flash_price}
-                    currency={item.product.currency}
-                    locale={locale}
-                  />
-                  <LiveStockGauge
-                    itemId={item.id}
-                    allocated={item.allocated_qty}
-                    initialRemaining={item.remaining_qty}
-                    label={{ lastPiece: t(locale, 'last_piece'), left: t(locale, 'stock_left') }}
-                  />
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
 
       {/* Mur Card-Gallery */}
       {/* Rail PACKS — les mariages du laboratoire */}
