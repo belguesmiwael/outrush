@@ -8,6 +8,7 @@ import SiteFooter from '@/components/shop/SiteFooter';
 import AddToCartButton from '@/components/shop/AddToCartButton';
 import LiveViewers from '@/components/shop/LiveViewers';
 import LiveStock from '@/components/shop/LiveStock';
+import LiveCartPressure from '@/components/shop/LiveCartPressure';
 import Countdown from '@/components/shop/Countdown';
 import FlashBadge from '@/components/shop/FlashBadge';
 import Money from '@/components/shop/Money';
@@ -43,6 +44,9 @@ export default async function ProductPage({ params }) {
   supabase.rpc('bump_product_views', { p_id: product.id }).then(() => {});
   const { data: sales24 } = await supabase.rpc('sales_last_24h');
   const soldToday = (sales24 ?? []).find((r) => r.product_id === product.id)?.sold ?? 0;
+  const { data: pressure } = await supabase
+    .from('cart_pressure').select('in_carts').eq('product_id', product.id).maybeSingle();
+  const inCarts = pressure?.in_carts ?? 0;
 
   const images = Array.isArray(product.images) ? product.images : [];
   const mainImg = images[0]
@@ -170,14 +174,12 @@ export default async function ProductPage({ params }) {
           {/* Signaux de conversion — données réelles + stock live */}
           <div className="flex flex-wrap gap-2 text-xs items-center">
             <LiveStock productId={product.id} initial={product.quantity} />
-            {soldToday > 0 ? (
-              <span className="px-2.5 py-1 rounded-full bg-white/5 text-app-muted">🛒 {soldToday} vendu{soldToday > 1 ? 's' : ''} aujourd'hui</span>
-            ) : null}
             {product.views > 0 ? (
-              <span className="px-2.5 py-1 rounded-full bg-white/5 text-app-muted">👁 {product.views} vues</span>
+              <span className="px-2.5 py-1 rounded-full bg-white/5 text-app-muted">👁 <span className="num">{product.views}</span> vues</span>
             ) : null}
             <LiveViewers productId={product.id} />
           </div>
+          <LiveCartPressure productId={product.id} initialInCarts={inCarts} initialSold={soldToday} />
 
           <AddToCartButton product={product} className="md:w-auto md:px-12" />
 
