@@ -470,3 +470,46 @@ body {
 
 /* RTL : la mono garde son sens de lecture pour les nombres */
 [dir="rtl"] .num, [dir="rtl"] .num-loot, [dir="rtl"] .num-tension { direction: ltr; unicode-bidi: embed; }
+
+/* ═══════════════════════════════════════════════════════
+   MOBILE — structure pro, zéro zoom involontaire, zéro shift
+   ═══════════════════════════════════════════════════════ */
+
+/* iOS zoome au focus si l'input fait < 16px. On force 16px sur mobile. */
+@media (max-width: 640px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* Empêche tout débordement horizontal (cause de scroll/zoom latéral) */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+* { min-width: 0; } /* les enfants flex/grid ne forcent plus la largeur */
+
+/* Les médias ne débordent jamais */
+img, video, canvas, svg { max-width: 100%; height: auto; }
+
+/* Encoches iPhone : padding sûr */
+.safe-x { padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); }
+.safe-b { padding-bottom: env(safe-area-inset-bottom); }
+.safe-t { padding-top: env(safe-area-inset-top); }
+
+/* Zone tactile minimale 44px (standard Apple/Google) sur mobile */
+@media (max-width: 640px) {
+  button, a[role="button"], .btn-rush, .btn-ghost {
+    min-height: 44px;
+  }
+}
+
+/* Scroll horizontal fluide (rails) sans barre, avec inertie iOS */
+.no-scrollbar { -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Empêche le layout shift : réserve le ratio des images produit */
+.aspect-product { aspect-ratio: 1 / 1; }
+
+/* Le texte ne déborde jamais des cartes */
+.card-premium, .card-hunt { overflow-wrap: break-word; }

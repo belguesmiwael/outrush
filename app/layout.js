@@ -44,9 +44,12 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: '#1a1a22',
+  themeColor: '#14141a',
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 };
 
 export default async function RootLayout({ children }) {

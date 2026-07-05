@@ -22,12 +22,15 @@ export default function SiteHeader({ categories = [], locale = 'fr' }) {
               <span>Cherchez une marque, un produit…</span>
             </Link>
           </div>
-          <nav className="flex items-center gap-1 sm:gap-2 shrink-0" style={{ fontFamily: 'var(--app-font-mono)', fontSize: '0.75rem', letterSpacing: '0.02em' }}>
-            <Link href="/shop" className="px-3 py-1.5 rounded-full hover:bg-white/5 transition-colors duration-220">Boutique</Link>
-            <Link href="/rush" className="px-3 py-1.5 rounded-full hover:bg-white/5 transition-colors duration-220">Le Flux</Link>
-            <Link href="/flash" className="px-3 py-1.5 rounded-full hover:bg-white/5 transition-colors duration-220">Flash</Link>
-            <Link href="/surprise-box" className="px-3 py-1.5 rounded-full hover:bg-white/5 transition-colors duration-220 hidden sm:block">Box</Link>
-            <Link href="/login" className="ml-1 rounded-full px-4 py-1.5 border border-white/12 hover:border-app-accent hover:text-app-accent transition-colors duration-220">Compte</Link>
+          <nav className="flex items-center gap-1 shrink-0" style={{ fontFamily: 'var(--app-font-mono)', fontSize: '0.75rem', letterSpacing: '0.02em' }}>
+            <Link href="/shop" aria-label="Rechercher" className="md:hidden w-9 h-9 grid place-items-center rounded-full hover:bg-white/5 transition-colors duration-220 text-lg">⌕</Link>
+            <Link href="/shop" className="hidden md:block px-3 py-1.5 rounded-full hover:bg-white/5 transition-colors duration-220">Boutique</Link>
+            <Link href="/rush" className="hidden md:block px-3 py-1.5 rounded-full hover:bg-white/5 transition-colors duration-220">Le Flux</Link>
+            <Link href="/flash" className="px-3 py-1.5 rounded-full hover:bg-white/5 transition-colors duration-220 text-app-accent">Flash</Link>
+            <Link href="/surprise-box" className="hidden md:block px-3 py-1.5 rounded-full hover:bg-white/5 transition-colors duration-220">Box</Link>
+            <Link href="/login" aria-label="Compte" className="w-9 h-9 md:w-auto md:h-auto grid place-items-center md:px-4 md:py-1.5 rounded-full md:border md:border-white/12 hover:border-app-accent hover:text-app-accent transition-colors duration-220">
+              <span className="md:hidden text-lg">◔</span><span className="hidden md:inline">Compte</span>
+            </Link>
             <CartButton />
           </nav>
         </div>

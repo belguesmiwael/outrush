@@ -135,26 +135,30 @@ export default function HeroGame({ products = [], locale = 'fr' }) {
   function onMove(e) {
     const rect = zoneRef.current?.getBoundingClientRect();
     if (!rect) return;
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    // La chasse n'est active que dans la moitié droite (ne gêne pas le texte)
-    if (x < 50) {
+    // Coordonnées souris OU tactile
+    const point = e.touches?.[0] ?? e;
+    const clientX = point.clientX, clientY = point.clientY;
+    if (clientX == null) return;
+    const x = ((clientX - rect.left) / rect.width) * 100;
+    const y = ((clientY - rect.top) / rect.height) * 100;
+    // Sur tactile, toute la zone est jouable ; sur souris, moitié droite seulement
+    const isTouch = Boolean(e.touches);
+    if (!isTouch && x < 50) {
       setTarget((t) => (t.active ? { ...t, active: false } : t));
       return;
     }
     setTarget({ x, y, active: true });
 
-    // Collision en PIXELS réels : la cible doit vraiment être sur le produit.
-    const px = e.clientX - rect.left;
-    const py = e.clientY - rect.top;
+    const px = clientX - rect.left;
+    const py = clientY - rect.top;
     setItems((prev) => {
       let hit = null;
       for (const it of prev) {
         const ix = (it.x / 100) * rect.width;
         const iy = (it.y / 100) * rect.height;
         const half = (it.size ?? 60) / 2;
-        // Touche si le centre de la cible est dans la vignette (+ petite marge)
-        if (Math.abs(px - ix) <= half + 4 && Math.abs(py - iy) <= half + 4) { hit = it; break; }
+        const margin = isTouch ? 14 : 4; // cible tactile plus tolérante
+        if (Math.abs(px - ix) <= half + margin && Math.abs(py - iy) <= half + margin) { hit = it; break; }
       }
       if (hit) { explode(hit); return prev.filter((i) => i.id !== hit.id); }
       return prev;
@@ -168,6 +172,9 @@ export default function HeroGame({ products = [], locale = 'fr' }) {
       ref={zoneRef}
       onMouseMove={onMove}
       onMouseLeave={() => setTarget((t) => ({ ...t, active: false }))}
+      onTouchStart={onMove}
+      onTouchMove={(e) => { onMove(e); }}
+      onTouchEnd={() => setTarget((t) => ({ ...t, active: false }))}
       className="absolute inset-0 z-10 overflow-hidden select-none"
       style={{ cursor: target.active ? 'none' : 'default' }}
     >

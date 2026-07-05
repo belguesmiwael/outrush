@@ -57,11 +57,11 @@ export default async function ProductPage({ params }) {
   return (
     <>
       <SiteHeader locale={locale} />
-      <main className="min-h-dvh max-w-6xl mx-auto px-4 py-8">
+      <main className="min-h-dvh max-w-6xl mx-auto px-4 py-6 md:py-8 safe-x">
         <Link href="/" className="text-sm text-app-muted hover:text-app-text transition-colors duration-120">
           ← OUTRUSH
         </Link>
-      <div className="grid md:grid-cols-2 gap-10 mt-6">
+      <div className="grid md:grid-cols-2 gap-6 md:gap-10 mt-4 md:mt-6">
         <ProductGallery images={images} alt={localized(product.title, locale)} />
 
         <div className="space-y-6">
