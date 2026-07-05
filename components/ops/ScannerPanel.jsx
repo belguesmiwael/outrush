@@ -118,12 +118,17 @@ export default function ScannerPanel() {
     };
   }, [enqueue]);
 
-  // ── Mode douchette : input caché toujours focus ──
+  // ── Mode douchette : input caché refocus SEULEMENT hors des champs interactifs ──
   useEffect(() => {
     const el = hidRef.current;
     if (!el) return;
-    const keepFocus = () => el.focus();
-    el.focus();
+    const keepFocus = (e) => {
+      // Ne pas voler le focus si l'utilisateur clique sur un vrai champ / bouton
+      const target = e.target;
+      if (target.closest('input, textarea, select, button, a, [contenteditable], label, form')) return;
+      el.focus({ preventScroll: true });
+    };
+    el.focus({ preventScroll: true });
     document.addEventListener('click', keepFocus);
     return () => document.removeEventListener('click', keepFocus);
   }, []);
