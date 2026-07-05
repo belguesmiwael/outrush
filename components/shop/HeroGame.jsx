@@ -177,16 +177,16 @@ export default function HeroGame({ products = [], locale = 'fr' }) {
       {/* Double compteur : dernière offre ciblée + total cumulé */}
       <div className="absolute top-5 right-5 z-20 pointer-events-none text-right space-y-2">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.3em] text-app-muted">Dernière offre</p>
-          <p className="font-display font-extrabold text-2xl text-app-accent tabular-nums">
+          <p className="eyebrow">Dernière offre</p>
+          <p className="num-tension text-2xl">
             {last !== null ? `+${displayMoney(last, cur)}` : '—'}
           </p>
         </div>
         <div>
-          <p className="text-[10px] uppercase tracking-[0.3em] text-app-muted">Total chassé</p>
-          <p className="font-display font-extrabold text-3xl text-app-success tabular-nums">{displayMoney(saved, cur)}</p>
+          <p className="eyebrow">Total chassé</p>
+          <p className="num-loot text-3xl">{displayMoney(saved, cur)}</p>
         </div>
-        <p className="text-[10px] uppercase tracking-[0.25em] text-app-accent">Visez · Tirez →</p>
+        <p className="eyebrow eyebrow-hot">Visez · Tirez →</p>
       </div>
 
       {/* Produits qui tombent (tailles variables) */}
@@ -219,7 +219,7 @@ export default function HeroGame({ products = [], locale = 'fr' }) {
 
       {/* Economie reelle qui tombe */}
       {coins.map((c) => (
-        <div key={c.id} className="absolute z-10 pointer-events-none flex items-center gap-1 font-display font-extrabold text-app-success text-sm"
+        <div key={c.id} className="absolute z-10 pointer-events-none flex items-center gap-1 num-loot text-sm"
           style={{ left: `${c.x}%`, top: `${c.y}%`, transform: 'translate(-50%,-50%)', opacity: c.life / 55 }}>
           <span>+{displayMoney(c.amount, cur)}</span>
         </div>

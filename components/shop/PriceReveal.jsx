@@ -9,11 +9,11 @@ export default function PriceReveal({ marketPrice, outletPrice, currency = 'USD'
   return (
     <div className="price-reveal flex items-baseline gap-3 flex-wrap">
       {marketPrice ? (
-        <s className={`text-app-muted ${big ? 'text-lg' : 'text-sm'}`}>
+        <s className={`num text-app-muted ${big ? 'text-lg' : 'text-sm'}`}>
           {displayMoney(marketPrice, cur)}
         </s>
       ) : null}
-      <span className={`font-display font-bold text-app-text ${big ? 'text-3xl' : 'text-xl'}`}>
+      <span className={`num font-semibold text-app-text ${big ? 'text-3xl' : 'text-xl'}`}>
         {displayMoney(outletPrice, cur)}
       </span>
       {pct !== null ? <span className={`seal ${big ? 'text-base' : 'text-xs'}`}>−{pct}%</span> : null}

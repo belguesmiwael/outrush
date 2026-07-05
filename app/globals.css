@@ -3,15 +3,21 @@
 @tailwind utilities;
 
 :root {
-  /* ── OUTRUSH DNA — Noir Sensoriel · chronomètre ── */
-  --app-accent:       oklch(62% 0.24 25);
+  /* ── OUTRUSH · TERMINAL VELVET — la traque chronométrée ── */
+  /* Rampe de lightness OKLCH unique partagée (hue chaude 25-30 pour neutres) */
+  --app-accent:       oklch(62% 0.24 25);   /* vermillon — TENSION (rationné) */
   --app-accent-soft:  oklch(62% 0.12 25);
-  --app-bg:           oklch(16% 0.015 260);
-  --app-surface:      oklch(21% 0.015 260);
-  --app-surface-2:    oklch(26% 0.015 260);
-  --app-text:         oklch(96% 0.005 260);
-  --app-text-muted:   oklch(72% 0.01 260);
-  --app-success:      oklch(70% 0.17 155);
+  --app-accent-hi:    oklch(70% 0.22 32);   /* vermillon vif (dernière pièce) */
+  --app-loot:         oklch(80% 0.14 85);   /* laiton/or — BUTIN (économie) */
+  --app-loot-soft:    oklch(80% 0.08 85);
+  --app-bg:           oklch(14% 0.012 30);  /* obsidienne chaude (hue 30, pas 260 froid) */
+  --app-surface:      oklch(19% 0.014 30);
+  --app-surface-2:    oklch(24% 0.016 30);
+  --app-line:         oklch(100% 0 0 / 0.06);
+  --app-line-strong:  oklch(100% 0 0 / 0.12);
+  --app-text:         oklch(95% 0.008 60);  /* blanc chaud, jamais pur */
+  --app-text-muted:   oklch(68% 0.014 45);
+  --app-success:      oklch(72% 0.16 155);
   --app-danger:       oklch(58% 0.22 28);
 
   /* Physique d'animation — jamais linear, jamais 0.3s ease */
@@ -21,7 +27,13 @@
   --dur-reveal: 380ms;
   --dur-drop: 600ms;
 
-  /* Élévation — 5 niveaux, lumière constante haut-gauche */
+  /* Fonts */
+  --app-font-mono: var(--app-font-mono, 'Martian Mono'), ui-monospace, monospace;
+
+  /* Rayons — nets côté terminal, doux côté boutique */
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 22px;
+
+  /* Élévation — 5 niveaux, lumière constante haut-gauche, halo chaud */
   --el-1: 0 1px 2px oklch(0% 0 0 / 0.4);
   --el-2: 0 1px 2px oklch(0% 0 0 / 0.4), 0 4px 12px oklch(0% 0 0 / 0.3);
   --el-3: 0 2px 4px oklch(0% 0 0 / 0.45), 0 8px 24px oklch(0% 0 0 / 0.35);
@@ -296,3 +308,165 @@ body {
   .no-print { display: none !important; }
   body { background: #fff !important; }
 }
+
+/* ═══════════════════════════════════════════════════════
+   TERMINAL VELVET — signature OUTRUSH (refonte identité)
+   marché financier × velours nocturne · la traque
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Fond matiéré : obsidienne chaude + grain film + halos de chaleur ── */
+body {
+  background-color: oklch(13% 0.012 30);
+  background-image:
+    radial-gradient(ellipse 65% 50% at 12% -8%, oklch(62% 0.24 25 / 0.09), transparent 58%),
+    radial-gradient(ellipse 55% 45% at 92% 4%, oklch(80% 0.14 85 / 0.045), transparent 55%),
+    radial-gradient(ellipse 80% 60% at 50% 110%, oklch(62% 0.24 25 / 0.05), transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+}
+
+/* ── CHIFFRES VIVANTS : tout ce qui se traque est en monospace ── */
+/* prix, chronos, stock, économies, codes, quantités */
+.num, .mono, .tabular-nums {
+  font-family: var(--app-font-mono);
+  font-feature-settings: "tnum" 1, "zero" 1;
+  letter-spacing: -0.02em;
+}
+.num-loot { font-family: var(--app-font-mono); color: var(--app-loot); font-weight: 600; letter-spacing: -0.02em; }
+.num-tension { font-family: var(--app-font-mono); color: var(--app-accent); font-weight: 600; letter-spacing: -0.02em; }
+
+/* ── Eyebrow terminal : libellé technique en mono espacé ── */
+.eyebrow {
+  font-family: var(--app-font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+.eyebrow-hot { color: var(--app-accent); }
+
+/* ── Sceau de remise : jeton embossé au laiton (butin), pas rouge ── */
+.seal {
+  font-family: var(--app-font-mono);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  letter-spacing: -0.02em;
+  color: var(--app-loot);
+  border: 1px solid oklch(80% 0.14 85 / 0.4);
+  border-radius: 8px;
+  padding: 0.3rem 0.7rem;
+  background:
+    radial-gradient(circle at 30% 20%, oklch(80% 0.14 85 / 0.16), transparent 70%),
+    oklch(19% 0.014 30);
+  box-shadow:
+    inset 0 1px 1px oklch(95% 0.02 85 / 0.14),
+    inset 0 -1px 2px oklch(0% 0 0 / 0.5),
+    0 1px 2px oklch(0% 0 0 / 0.4);
+}
+
+/* ── Révélation d'économie : le butin qui "tombe" en laiton ── */
+@keyframes loot-drop {
+  0%   { opacity: 0; transform: translateY(-8px) scale(0.9); }
+  60%  { opacity: 1; transform: translateY(2px) scale(1.04); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.loot-drop { animation: loot-drop var(--dur-reveal) var(--ease-out-expo) both; }
+
+/* ── Ticker de tension : fine ligne qui pulse (temps réel véridique) ── */
+.tension-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--app-accent), transparent);
+  background-size: 200% 100%;
+  animation: tension-scan 3s var(--ease-out-expo) infinite;
+}
+@keyframes tension-scan { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .tension-line { animation: none; } }
+
+/* ── Rule accent : passe au laiton, marqueur de section terminal ── */
+.rule-accent {
+  height: 2px; width: 40px;
+  background: linear-gradient(90deg, var(--app-loot), transparent);
+  border-radius: 2px;
+}
+
+/* ── Carte : velours matiéré, liseré chaud au hover, coin technique ── */
+.card-premium {
+  background:
+    linear-gradient(158deg, oklch(21% 0.014 30), oklch(17% 0.013 30));
+  border: 1px solid var(--app-line);
+  border-radius: var(--r-lg);
+}
+.card-premium::after {
+  /* coin technique haut-droit : marqueur terminal discret */
+  content: "";
+  position: absolute; top: 10px; right: 10px;
+  width: 5px; height: 5px; border-radius: 999px;
+  background: var(--app-accent);
+  opacity: 0; transform: scale(0.6);
+  transition: opacity var(--dur-enter) var(--ease-out-expo), transform var(--dur-enter) var(--ease-out-expo);
+  box-shadow: 0 0 10px oklch(62% 0.24 25 / 0.7);
+  z-index: 5; pointer-events: none;
+}
+.card-premium:hover::after { opacity: 1; transform: scale(1); }
+.card-premium:hover { border-color: oklch(62% 0.24 25 / 0.3); }
+
+.card-hunt {
+  background: linear-gradient(158deg, oklch(20% 0.014 30), oklch(17% 0.013 30));
+  border: 1px solid var(--app-line);
+  border-radius: var(--r-md);
+}
+
+/* ── Bouton primaire : plaque de tension, biseau chaud ── */
+.btn-rush {
+  font-family: var(--app-font-display); font-weight: 700;
+  letter-spacing: -0.01em;
+  background: linear-gradient(180deg, var(--app-accent-hi), var(--app-accent));
+  color: white; border-radius: var(--r-md);
+  box-shadow: 0 4px 16px oklch(62% 0.24 25 / 0.3), inset 0 1px 0 oklch(100% 0 0 / 0.25);
+}
+.btn-rush:hover { box-shadow: 0 8px 28px oklch(62% 0.24 25 / 0.42), inset 0 1px 0 oklch(100% 0 0 / 0.3); }
+
+/* ── Bouton ghost : contour terminal ── */
+.btn-ghost {
+  border: 1px solid var(--app-line-strong); border-radius: var(--r-md);
+  font-family: var(--app-font-mono); font-size: 0.8125rem; letter-spacing: 0.02em;
+}
+.btn-ghost:hover { border-color: oklch(80% 0.14 85 / 0.5); background: oklch(80% 0.14 85 / 0.05); }
+
+/* ── Jauge de stock : tension rouge, graduée comme un instrument ── */
+.stock-gauge {
+  height: 5px; background: var(--app-surface-2); border-radius: 999px; overflow: hidden;
+  position: relative;
+}
+.stock-gauge::before {
+  content: ""; position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(90deg, oklch(0% 0 0 / 0.3) 0 1px, transparent 1px 12px);
+  z-index: 2;
+}
+.stock-gauge > div {
+  height: 100%; background: linear-gradient(90deg, var(--app-accent), var(--app-accent-hi));
+  border-radius: 999px; transition: width var(--dur-reveal) var(--ease-out-expo);
+}
+
+/* ── Display hero : garde Bricolage mais serrage éditorial ── */
+.display-hero { letter-spacing: -0.035em; line-height: 0.92; }
+
+/* ── Focus signature : cadre de visée ── */
+:focus-visible {
+  outline: 2px solid var(--app-loot);
+  outline-offset: 3px;
+}
+
+/* ── Verre : teinte chaude ── */
+.glass {
+  background: oklch(18% 0.014 30 / 0.6);
+  backdrop-filter: blur(20px) saturate(1.25);
+  -webkit-backdrop-filter: blur(20px) saturate(1.25);
+  border: 1px solid var(--app-line);
+}
+
+::selection { background: oklch(80% 0.14 85 / 0.3); }
+
+/* RTL : la mono garde son sens de lecture pour les nombres */
+[dir="rtl"] .num, [dir="rtl"] .num-loot, [dir="rtl"] .num-tension { direction: ltr; unicode-bidi: embed; }

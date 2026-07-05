@@ -1,4 +1,4 @@
-import { Bricolage_Grotesque, Onest } from 'next/font/google';
+import { Bricolage_Grotesque, Onest, Martian_Mono } from 'next/font/google';
 import './globals.css';
 import { CartProvider } from '@/lib/cart/CartContext';
 import CartDrawer from '@/components/shop/CartDrawer';
@@ -18,6 +18,13 @@ const display = Bricolage_Grotesque({
 const body = Onest({
   subsets: ['latin'],
   variable: '--app-font-body',
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+});
+
+const mono = Martian_Mono({
+  subsets: ['latin'],
+  variable: '--app-font-mono',
   weight: ['400', '500', '600', '700'],
   display: 'swap',
 });
@@ -43,7 +50,7 @@ export const viewport = {
 export default async function RootLayout({ children }) {
   const { currency, rate } = await getCurrencySettings();
   return (
-    <html lang="fr" className={`${display.variable} ${body.variable}`}>
+    <html lang="fr" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body>
         <CurrencyProvider currency={currency} rate={rate}>
           <CartProvider>
