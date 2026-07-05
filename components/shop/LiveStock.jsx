@@ -42,7 +42,7 @@ export default function LiveStock({ productId, initial }) {
   return (
     <span className="inline-flex items-center gap-2">
       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${qty <= 5 ? 'bg-[color:var(--app-accent)]/15 text-app-accent pulse-last' : 'bg-white/5 text-app-muted'}`}>
-        {qty <= 5 ? `⚡ Plus que ${qty}` : `En stock : ${qty}`}
+        {qty <= 5 ? <>⚡ Plus que <span className="num">{qty}</span></> : <>En stock : <span className="num">{qty}</span></>}
       </span>
       {justDropped ? (
         <span className="px-2.5 py-1 rounded-full bg-app-accent text-white text-xs font-medium animate-[reveal-up_0.4s_ease]">

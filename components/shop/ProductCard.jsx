@@ -73,7 +73,7 @@ export default function ProductCard({ product, locale = 'fr', index = 0, sold = 
             locale={locale}
           />
           {sold > 0 ? (
-            <p className="text-[11px] text-app-muted">🛒 {sold} vendu{sold > 1 ? 's' : ''} aujourd'hui</p>
+            <p className="text-[11px] text-app-muted">🛒 <span className="num">{sold}</span> vendu{sold > 1 ? 's' : ''} aujourd'hui</p>
           ) : null}
         </div>
       </div>
