@@ -2,7 +2,8 @@
 import { useRef } from 'react';
 import Link from 'next/link';
 import { localized } from '@/lib/i18n/dictionaries';
-import { formatPrice, discountPct } from '@/lib/utils';
+import { discountPct } from '@/lib/utils';
+import { useCurrency, displayMoney } from '@/lib/currency/CurrencyContext';
 import { scarcity } from '@/lib/rush/daily';
 
 function mediaUrl(path) {
@@ -14,6 +15,7 @@ function mediaUrl(path) {
 /** Flux vertical plein écran, snap par produit — la chasse en continu. */
 export default function RushFeed({ products, locale = 'fr' }) {
   const containerRef = useRef(null);
+  const cur = useCurrency();
 
   return (
     <div
@@ -69,10 +71,10 @@ export default function RushFeed({ products, locale = 'fr' }) {
               </h2>
               <div className="flex items-baseline gap-3">
                 {p.market_price ? (
-                  <span className="text-white/50 line-through text-lg">{formatPrice(p.market_price, p.currency, locale)}</span>
+                  <span className="num text-white/50 line-through text-lg">{displayMoney(p.market_price, cur)}</span>
                 ) : null}
-                <span className="font-display font-extrabold text-3xl text-app-accent">
-                  {formatPrice(p.outlet_price, p.currency, locale)}
+                <span className="num-tension font-semibold text-3xl">
+                  {displayMoney(p.outlet_price, cur)}
                 </span>
               </div>
               <Link

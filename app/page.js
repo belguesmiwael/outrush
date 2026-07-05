@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { localized, t } from '@/lib/i18n/dictionaries';
 import { formatPrice, discountPct } from '@/lib/utils';
+import Money from '@/components/shop/Money';
 import { pickDailyRush, secondsUntilRotation } from '@/lib/rush/daily';
 import Countdown from '@/components/shop/Countdown';
 import RotationTimer from '@/components/shop/RotationTimer';
@@ -230,7 +231,7 @@ export default async function HomePage() {
                   </div>
                   <div className="p-4">
                     <p className="font-medium leading-snug line-clamp-1">{localized(pk.title, locale)}</p>
-                    <p className="text-app-accent font-display font-bold mt-1">{formatPrice(pk.pack_price, 'USD', locale)}</p>
+                    <p className="text-app-accent font-display font-bold mt-1"><Money amount={pk.pack_price} /></p>
                   </div>
                 </Link>
               );

@@ -3,7 +3,7 @@ import { useActionState } from 'react';
 import Link from 'next/link';
 import { composeSurpriseBox } from '@/lib/actions/surprise-box';
 import { localized } from '@/lib/i18n/dictionaries';
-import { formatPrice } from '@/lib/utils';
+import { useCurrency, displayMoney } from '@/lib/currency/CurrencyContext';
 
 function mediaUrl(path) {
   return path
@@ -21,6 +21,7 @@ const UNIVERSES = [
 ];
 
 export default function SurpriseBoxBuilder() {
+  const cur = useCurrency();
   const [state, action, pending] = useActionState(composeSurpriseBox, null);
 
   return (
@@ -68,12 +69,12 @@ export default function SurpriseBoxBuilder() {
       {state?.ok ? (
         <div className="space-y-5 rise-in">
           <div className="text-center space-y-2">
-            <p className="text-app-muted text-sm">Vous payez {formatPrice(state.budget, 'USD')} — vous recevez</p>
+            <p className="text-app-muted text-sm">Vous payez {displayMoney(state.budget, cur)} — vous recevez</p>
             <p className="font-display font-extrabold text-4xl text-app-success">
-              {formatPrice(state.total_value, 'USD')} de valeur
+              {displayMoney(state.total_value, cur)} de valeur
             </p>
             <p className="text-app-accent font-medium">
-              {state.count} pièces · +{formatPrice(state.savings, 'USD')} de valeur offerte
+              {state.count} pièces · +{displayMoney(state.savings, cur)} de valeur offerte
             </p>
           </div>
 
@@ -98,7 +99,7 @@ export default function SurpriseBoxBuilder() {
           </div>
 
           <button className="w-full rounded-xl py-4 font-display font-bold text-lg bg-app-accent text-white transition-transform duration-[220ms] hover:scale-[1.01] active:scale-[0.98]">
-            Commander cette box — {formatPrice(state.budget, 'USD')}
+            Commander cette box — {displayMoney(state.budget, cur)}
           </button>
           <p className="text-xs text-app-muted text-center">
             Le contenu exact reste une surprise jusqu'à la livraison. Valeur garantie supérieure au prix payé.
