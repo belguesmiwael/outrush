@@ -1,6 +1,6 @@
-// Service worker — v2. Ne cache JAMAIS les pages ops/admin ni les routes API
+// Service worker — v3. Ne cache JAMAIS les pages ops/admin ni les routes API
 // (toujours du réseau frais). Se met à jour immédiatement.
-const CACHE = 'outrush-v2';
+const CACHE = 'outrush-v3';
 
 self.addEventListener('install', () => { self.skipWaiting(); });
 self.addEventListener('activate', (e) => {
