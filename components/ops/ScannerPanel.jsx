@@ -192,6 +192,7 @@ export default function ScannerPanel() {
       try {
         const fd = new FormData();
         fd.set('photo', file);
+        if (pendingCode?.code) { fd.set('code', pendingCode.code); setPendingCode(null); }
         const res = await fetch('/api/scan-photo', { method: 'POST', body: fd });
         const json = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(json.error || 'photo_failed');
@@ -313,13 +314,12 @@ export default function ScannerPanel() {
           </div>
         ) : null}
 
-        {/* Import fichier (fallback sans webcam) */}
-        <label className="absolute bottom-4 right-4 cursor-pointer px-3 py-2 rounded-full font-medium text-xs bg-black/60 backdrop-blur border border-white/20 transition-transform duration-120 active:scale-95">
-          🖼 Importer
+        {/* Import d'images depuis l'appareil (alternative au scan) */}
+        <label className="absolute bottom-4 right-4 cursor-pointer px-4 py-2.5 rounded-full font-medium text-sm bg-white/10 backdrop-blur border border-white/25 hover:bg-white/15 transition-all duration-120 active:scale-95 flex items-center gap-2">
+          🖼 Importer une image
           <input
             type="file"
             accept="image/*"
-            capture="environment"
             multiple
             className="hidden"
             onChange={onPhotoPicked}

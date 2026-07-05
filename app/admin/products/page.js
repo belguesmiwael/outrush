@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { setProductStatus, deleteProduct, applyPhotoStudio, enrichGallery } from '@/lib/actions/admin-products';
+import { setProductStatus, deleteProduct } from '@/lib/actions/admin-products';
+import ProductImageActions from '@/components/admin/ProductImageActions';
 import { ProductSelectProvider, ProductCheckbox, BulkActionBar } from '@/components/admin/ProductBulkSelect';
 import { localized } from '@/lib/i18n/dictionaries';
 import { formatPrice, discountPct } from '@/lib/utils';
@@ -130,28 +131,11 @@ export default async function AdminProductsPage({ searchParams }) {
                   >
                     Éditer
                   </Link>
-                  {(p.images ?? []).length ? (
-                    <form action={applyPhotoStudio}>
-                      <input type="hidden" name="productId" value={p.id} />
-                      <button
-                        className="text-xs px-2.5 py-1.5 rounded-lg text-app-accent border border-app-accent/30 hover:bg-[color:var(--app-accent)]/10 transition-colors duration-120"
-                        title="Studio photo : détourage + mise en scène pro"
-                      >
-                        ✨ Studio
-                      </button>
-                    </form>
-                  ) : null}
-                  {p.gtin ? (
-                    <form action={enrichGallery}>
-                      <input type="hidden" name="productId" value={p.id} />
-                      <button
-                        className="text-xs px-2.5 py-1.5 rounded-lg border border-white/10 hover:bg-app-surface transition-colors duration-120"
-                        title="Télécharger les images officielles du produit (via GTIN)"
-                      >
-                        🖼 Galerie
-                      </button>
-                    </form>
-                  ) : null}
+                  <ProductImageActions
+                    productId={p.id}
+                    hasImage={(p.images ?? []).length > 0}
+                    hasGtin={Boolean(p.gtin)}
+                  />
                   <form action={deleteProduct}>
                     <input type="hidden" name="productId" value={p.id} />
                     <button className="text-xs px-2 py-1.5 rounded-lg text-app-muted hover:text-app-accent transition-colors duration-120" title="Supprimer / archiver">
