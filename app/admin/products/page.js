@@ -34,6 +34,8 @@ export default async function AdminProductsPage({ searchParams }) {
   if (q) query = query.ilike('slug', `%${q}%`);
 
   const { data: products } = await query;
+  const { data: categories } = await supabase
+    .from('categories').select('id, slug, name').order('slug', { ascending: true });
 
   return (
     <ProductSelectProvider>
@@ -149,7 +151,7 @@ export default async function AdminProductsPage({ searchParams }) {
           })}
         </div>
       )}
-      <BulkActionBar />
+      <BulkActionBar categories={categories ?? []} />
     </main>
     </ProductSelectProvider>
   );

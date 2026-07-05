@@ -1,12 +1,14 @@
 'use client';
 import { useState, useTransition, createContext, useContext } from 'react';
-import { deleteProductsBulk } from '@/lib/actions/admin-products';
+import { useRouter } from 'next/navigation';
+import { deleteProductsBulk, classifyProductsBulk } from '@/lib/actions/admin-products';
 
 const SelectContext = createContext(null);
 
 export function ProductSelectProvider({ children }) {
   const [selected, setSelected] = useState(new Set());
   const [pending, start] = useTransition();
+  const router = useRouter();
 
   const toggle = (id) => setSelected((prev) => {
     const next = new Set(prev);
@@ -25,8 +27,18 @@ export function ProductSelectProvider({ children }) {
     });
   }
 
+  function classifySelected(categoryId) {
+    if (!selected.size || !categoryId) return;
+    start(async () => {
+      const res = await classifyProductsBulk([...selected], categoryId);
+      if (res?.ok === false) alert('Classification impossible : ' + (res.detail ?? res.error));
+      else clear();
+      router.refresh();
+    });
+  }
+
   return (
-    <SelectContext.Provider value={{ selected, toggle, clear, removeSelected, pending }}>
+    <SelectContext.Provider value={{ selected, toggle, clear, removeSelected, classifySelected, pending }}>
       {children}
     </SelectContext.Provider>
   );
@@ -52,15 +64,31 @@ export function ProductCheckbox({ id }) {
 }
 
 /** Barre d'action flottante quand des produits sont sélectionnés. */
-export function BulkActionBar() {
+export function BulkActionBar({ categories = [] }) {
   const ctx = useProductSelect();
   if (!ctx || ctx.selected.size === 0) return null;
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 glass rounded-full px-5 py-3 flex items-center gap-4 shadow-2xl animate-[reveal-up_0.3s_ease]">
-      <span className="text-sm font-medium">{ctx.selected.size} sélectionné(s)</span>
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 glass rounded-2xl px-4 py-3 flex flex-wrap items-center justify-center gap-3 shadow-2xl animate-[reveal-up_0.3s_ease] max-w-[calc(100vw-1rem)] safe-b">
+      <span className="text-sm font-medium num">{ctx.selected.size}</span>
+      <span className="text-sm text-app-muted">sélectionné(s)</span>
+
+      {categories.length ? (
+        <select
+          defaultValue=""
+          disabled={ctx.pending}
+          onChange={(e) => { if (e.target.value) ctx.classifySelected(e.target.value); e.target.value = ''; }}
+          className="rounded-full bg-app-surface-2 border border-white/10 px-3 py-2 text-sm max-w-[46vw] disabled:opacity-50"
+        >
+          <option value="" disabled>Classer dans…</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>{typeof c.name === 'object' ? (c.name.fr ?? c.slug) : (c.name ?? c.slug)}</option>
+          ))}
+        </select>
+      ) : null}
+
       <button onClick={ctx.removeSelected} disabled={ctx.pending}
-        className="rounded-full px-4 py-1.5 text-sm font-display font-bold bg-app-accent text-white disabled:opacity-50 transition-transform duration-120 active:scale-95">
-        {ctx.pending ? 'Suppression…' : 'Supprimer'}
+        className="rounded-full px-4 py-2 text-sm font-display font-bold bg-app-accent text-white disabled:opacity-50 transition-transform duration-120 active:scale-95">
+        {ctx.pending ? '…' : 'Supprimer'}
       </button>
       <button onClick={ctx.clear} className="text-sm text-app-muted hover:text-app-text">Annuler</button>
     </div>
