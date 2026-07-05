@@ -67,12 +67,13 @@ export default async function ProductPage({ params }) {
           <h1 className="font-display font-bold text-3xl leading-tight">{localized(product.title, locale)}</h1>
           {flash ? (
             <div className="flex items-center gap-3 flex-wrap">
-              <FlashBadge />
+              <FlashBadge force />
               <span className="eyebrow eyebrow-hot">Fin du drop</span>
               <Countdown endsAt={flash.endsAt} serverNow={new Date().toISOString()} className="num-tension text-lg" />
             </div>
           ) : null}
           <PriceReveal
+            productId={product.id}
             marketPrice={flash ? product.outlet_price : product.market_price}
             outletPrice={flash ? flash.price : product.outlet_price}
             currency={product.currency}

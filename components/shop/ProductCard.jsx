@@ -36,7 +36,7 @@ export default function ProductCard({ product, locale = 'fr', index = 0, sold = 
 
         {/* Badges empilés en haut à gauche */}
         <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1.5 items-start">
-          {product.flash ? <FlashBadge /> : null}
+          {product.flash ? <FlashBadge force /> : <FlashBadge productId={product.id} />}
           {rare ? (
             <span
               className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full backdrop-blur ${
@@ -69,6 +69,7 @@ export default function ProductCard({ product, locale = 'fr', index = 0, sold = 
         <h3 className="font-medium leading-snug line-clamp-2 min-h-[2.6em]">{localized(product.title, locale)}</h3>
         <div className="mt-auto pt-1 space-y-1.5">
           <PriceReveal
+            productId={product.id}
             marketPrice={product.flash ? product.outlet_price : product.market_price}
             outletPrice={product.flash ? product.flash.price : product.outlet_price}
             currency={product.currency}

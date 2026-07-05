@@ -6,6 +6,8 @@ import { QuickLookProvider } from '@/lib/quicklook/QuickLookContext';
 import QuickLookModal from '@/components/shop/QuickLookModal';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 import { CurrencyProvider } from '@/lib/currency/CurrencyContext';
+import { FlashLiveProvider } from '@/lib/flash/FlashLiveContext';
+import { getActiveFlashMap } from '@/lib/flash/active';
 import { getCurrencySettings } from '@/lib/currency/server';
 
 const display = Bricolage_Grotesque({
@@ -49,18 +51,24 @@ export const viewport = {
 
 export default async function RootLayout({ children }) {
   const { currency, rate } = await getCurrencySettings();
+  const flashMap = await getActiveFlashMap();
+  const initialFlash = Object.fromEntries(
+    [...flashMap.entries()].map(([id, f]) => [id, { price: f.flashPrice, remaining: f.remaining, endsAt: f.endsAt }])
+  );
   return (
     <html lang="fr" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body>
         <CurrencyProvider currency={currency} rate={rate}>
-          <CartProvider>
-            <QuickLookProvider>
-              {children}
-              <CartDrawer />
-              <QuickLookModal />
-              <ServiceWorkerRegister />
-            </QuickLookProvider>
-          </CartProvider>
+          <FlashLiveProvider initial={initialFlash}>
+            <CartProvider>
+              <QuickLookProvider>
+                {children}
+                <CartDrawer />
+                <QuickLookModal />
+                <ServiceWorkerRegister />
+              </QuickLookProvider>
+            </CartProvider>
+          </FlashLiveProvider>
         </CurrencyProvider>
       </body>
     </html>
