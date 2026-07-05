@@ -4,8 +4,8 @@ import { enrichGallery } from '@/lib/actions/admin-products';
 import StudioModal from './StudioModal';
 
 const LABELS = {
-  no_gtin: 'Pas de code-barres pour trouver des images',
-  no_images_found: 'Aucune image officielle trouvée',
+  no_images_found: 'Aucune image officielle trouvée pour ce produit',
+  not_found: 'Produit introuvable',
   invalid: 'Requête invalide',
 };
 
@@ -48,16 +48,14 @@ export default function ProductImageActions({ productId, product, hasImage, hasG
           ✨ Studio
         </button>
       ) : null}
-      {hasGtin ? (
-        <button
-          onClick={runGallery}
-          disabled={pending}
-          className="text-xs px-2.5 py-1.5 rounded-lg border border-white/10 hover:bg-app-surface disabled:opacity-50 transition-colors duration-120"
-          title="Télécharge les images officielles du produit (via code-barres)"
-        >
-          {busy === 'gallery' ? 'Galerie…' : '🖼 Galerie'}
-        </button>
-      ) : null}
+      <button
+        onClick={runGallery}
+        disabled={pending}
+        className="text-xs px-2.5 py-1.5 rounded-lg border border-white/10 hover:bg-app-surface disabled:opacity-50 transition-colors duration-120"
+        title="Télécharge les vraies images officielles du produit (code-barres ou nom)"
+      >
+        {busy === 'gallery' ? 'Recherche…' : '🖼 Trouver des images'}
+      </button>
       {msg ? (
         <span className={`text-[11px] ${msg.type === 'ok' ? 'text-app-success' : 'text-app-accent'}`}>
           {msg.text}
