@@ -1,12 +1,9 @@
 'use client';
 import { useState, useTransition } from 'react';
-import { applyPhotoStudio, enrichGallery } from '@/lib/actions/admin-products';
+import { enrichGallery } from '@/lib/actions/admin-products';
+import StudioModal from './StudioModal';
 
 const LABELS = {
-  no_image: 'Aucune image à traiter',
-  download_failed: 'Image introuvable',
-  studio_failed: 'Détourage impossible (vérifiez la clé Gemini)',
-  upload_failed: 'Échec de l\'enregistrement',
   no_gtin: 'Pas de code-barres pour trouver des images',
   no_images_found: 'Aucune image officielle trouvée',
   invalid: 'Requête invalide',
@@ -18,23 +15,19 @@ function fd(productId) {
   return f;
 }
 
-export default function ProductImageActions({ productId, hasImage, hasGtin }) {
+export default function ProductImageActions({ productId, product, hasImage, hasGtin }) {
   const [pending, start] = useTransition();
-  const [msg, setMsg] = useState(null); // {type:'ok'|'err', text}
+  const [msg, setMsg] = useState(null);
   const [busy, setBusy] = useState(null);
+  const [studioOpen, setStudioOpen] = useState(false);
 
-  function run(kind) {
-    setBusy(kind); setMsg(null);
+  function runGallery() {
+    setBusy('gallery'); setMsg(null);
     start(async () => {
       try {
-        const res = kind === 'studio'
-          ? await applyPhotoStudio(fd(productId))
-          : await enrichGallery(fd(productId));
-        if (res?.ok) {
-          setMsg({ type: 'ok', text: kind === 'studio' ? 'Studio appliqué ✓' : `+${res.added ?? 0} image(s) ✓` });
-        } else {
-          setMsg({ type: 'err', text: LABELS[res?.error] ?? 'Échec' });
-        }
+        const res = await enrichGallery(fd(productId));
+        if (res?.ok) setMsg({ type: 'ok', text: `+${res.added ?? 0} image(s) ✓` });
+        else setMsg({ type: 'err', text: LABELS[res?.error] ?? 'Échec' });
       } catch {
         setMsg({ type: 'err', text: 'Erreur serveur' });
       } finally {
@@ -48,17 +41,16 @@ export default function ProductImageActions({ productId, hasImage, hasGtin }) {
     <div className="flex items-center gap-1.5 flex-wrap">
       {hasImage ? (
         <button
-          onClick={() => run('studio')}
-          disabled={pending}
-          className="text-xs px-2.5 py-1.5 rounded-lg text-app-loot border border-[color:var(--app-loot)]/30 hover:bg-[color:var(--app-loot)]/10 disabled:opacity-50 transition-colors duration-120"
-          title="Détoure la vraie photo et la pose sur un fond signature OUTRUSH"
+          onClick={() => setStudioOpen(true)}
+          className="text-xs px-2.5 py-1.5 rounded-lg text-app-loot border border-[color:var(--app-loot)]/30 hover:bg-[color:var(--app-loot)]/10 transition-colors duration-120"
+          title="Ouvre le studio : met en scène ta vraie photo sur un fond signature OUTRUSH"
         >
-          {busy === 'studio' ? 'Studio…' : '✨ Studio'}
+          ✨ Studio
         </button>
       ) : null}
       {hasGtin ? (
         <button
-          onClick={() => run('gallery')}
+          onClick={runGallery}
           disabled={pending}
           className="text-xs px-2.5 py-1.5 rounded-lg border border-white/10 hover:bg-app-surface disabled:opacity-50 transition-colors duration-120"
           title="Télécharge les images officielles du produit (via code-barres)"
@@ -70,6 +62,13 @@ export default function ProductImageActions({ productId, hasImage, hasGtin }) {
         <span className={`text-[11px] ${msg.type === 'ok' ? 'text-app-success' : 'text-app-accent'}`}>
           {msg.text}
         </span>
+      ) : null}
+
+      {studioOpen ? (
+        <StudioModal
+          product={product ?? { id: productId, images: [], title: {} }}
+          onClose={(saved) => { setStudioOpen(false); if (saved) setMsg({ type: 'ok', text: 'Studio enregistré ✓' }); }}
+        />
       ) : null}
     </div>
   );

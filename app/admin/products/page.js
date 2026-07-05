@@ -133,6 +133,7 @@ export default async function AdminProductsPage({ searchParams }) {
                   </Link>
                   <ProductImageActions
                     productId={p.id}
+                    product={{ id: p.id, title: p.title, brand: p.brand, images: p.images ?? [] }}
                     hasImage={(p.images ?? []).length > 0}
                     hasGtin={Boolean(p.gtin)}
                   />
