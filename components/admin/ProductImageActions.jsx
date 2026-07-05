@@ -2,6 +2,7 @@
 import { useState, useTransition } from 'react';
 import { enrichGallery } from '@/lib/actions/admin-products';
 import StudioModal from './StudioModal';
+import { Sparkles, Image as ImageIcon } from 'lucide-react';
 
 const LABELS = {
   no_images_found: 'Aucune image officielle trouvée pour ce produit',
@@ -45,7 +46,7 @@ export default function ProductImageActions({ productId, product, hasImage, hasG
           className="text-xs px-2.5 py-1.5 rounded-lg text-app-loot border border-[color:var(--app-loot)]/30 hover:bg-[color:var(--app-loot)]/10 transition-colors duration-120"
           title="Ouvre le studio : met en scène ta vraie photo sur un fond signature OUTRUSH"
         >
-          ✨ Studio
+          <span className='inline-flex items-center gap-1'><Sparkles size={13} strokeWidth={2} /> Studio</span>
         </button>
       ) : null}
       <button
@@ -54,7 +55,7 @@ export default function ProductImageActions({ productId, product, hasImage, hasG
         className="text-xs px-2.5 py-1.5 rounded-lg border border-white/10 hover:bg-app-surface disabled:opacity-50 transition-colors duration-120"
         title="Télécharge les vraies images officielles du produit (code-barres ou nom)"
       >
-        {busy === 'gallery' ? 'Recherche…' : '🖼 Trouver des images'}
+        {busy === 'gallery' ? 'Recherche…' : <span className='inline-flex items-center gap-1'><ImageIcon size={13} strokeWidth={2} /> Trouver des images</span>}
       </button>
       {msg ? (
         <span className={`text-[11px] ${msg.type === 'ok' ? 'text-app-success' : 'text-app-accent'}`}>

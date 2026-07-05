@@ -1,4 +1,5 @@
 'use client';
+import { RotateCw } from 'lucide-react';
 import { useState, useTransition } from 'react';
 import { relaunchScan, relaunchAllScans, deleteScan } from '@/lib/actions/scan';
 
@@ -44,7 +45,7 @@ export default function ScanManager({ scans = [] }) {
         {pendingCount > 0 ? (
           <button onClick={relaunchAll} disabled={pending}
             className="rounded-lg px-4 py-2 text-sm font-display font-bold bg-app-accent text-white disabled:opacity-50 transition-transform duration-120 hover:scale-[1.02] active:scale-95">
-            {busy === 'all' ? 'Relance en cours…' : `↻ Relancer tous (${pendingCount})`}
+            {busy === 'all' ? 'Relance en cours…' : <span className="inline-flex items-center gap-1.5"><RotateCw size={14} strokeWidth={2} /> Relancer tous ({pendingCount})</span>}
           </button>
         ) : null}
       </div>
@@ -72,7 +73,7 @@ export default function ScanManager({ scans = [] }) {
                 {['enriching', 'queued', 'not_found'].includes(s.status) ? (
                   <button onClick={() => relaunch(s.id)} disabled={pending}
                     className="text-xs px-3 py-1.5 rounded-lg border border-app-accent/30 text-app-accent hover:bg-[color:var(--app-accent)]/10 disabled:opacity-50 transition-colors duration-120">
-                    {busy === s.id ? '…' : '↻ Relancer'}
+                    {busy === s.id ? '…' : <span className='inline-flex items-center gap-1'><RotateCw size={12} strokeWidth={2} /> Relancer</span>}
                   </button>
                 ) : null}
                 <button onClick={() => remove(s.id)} disabled={pending}

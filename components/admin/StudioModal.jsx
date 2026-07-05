@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { X, RotateCw } from 'lucide-react';
 import { generateStudioPreview, saveStudioImage } from '@/lib/actions/admin-products';
 
 const STYLES = [
@@ -65,7 +66,7 @@ export default function StudioModal({ product, onClose }) {
             <h2 className="font-display font-bold text-xl mt-1">{product.title?.fr ?? 'Produit'}</h2>
             <p className="text-app-muted text-sm mt-1">Ta vraie photo, reposée sur un fond signature OUTRUSH. Le produit reste identique.</p>
           </div>
-          <button onClick={() => onClose(false)} className="w-9 h-9 grid place-items-center rounded-full glass text-xl leading-none shrink-0">×</button>
+          <button onClick={() => onClose(false)} className="w-9 h-9 grid place-items-center rounded-full glass text-xl leading-none shrink-0"><X size={18} strokeWidth={2} /></button>
         </div>
 
         {/* Avant / Après */}
@@ -109,7 +110,7 @@ export default function StudioModal({ product, onClose }) {
 
         <div className="flex items-center gap-3">
           <button onClick={generate} disabled={loading || saving} className="btn-ghost disabled:opacity-50">
-            {loading ? 'Génération…' : preview ? '↻ Régénérer' : 'Générer l\'aperçu'}
+            {loading ? 'Génération…' : preview ? <span className='inline-flex items-center gap-1.5'><RotateCw size={15} strokeWidth={2}/> Régénérer</span> : "Générer l'aperçu"}
           </button>
           {preview ? (
             <button onClick={save} disabled={saving} className="btn-rush disabled:opacity-50">

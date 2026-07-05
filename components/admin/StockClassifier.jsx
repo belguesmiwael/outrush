@@ -1,6 +1,7 @@
 'use client';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { Zap } from 'lucide-react';
 import { classifyStockNow } from '@/lib/actions/packs';
 
 export default function StockClassifier() {
@@ -37,7 +38,7 @@ export default function StockClassifier() {
           <p className="text-app-muted text-sm mt-1">Analyse la vélocité (héros / dormants) puis propose des packs. À lancer avant de générer des packs.</p>
         </div>
         <button onClick={run} disabled={pending} className="btn-rush disabled:opacity-50 shrink-0">
-          {pending ? 'Analyse…' : '⚡ Classer maintenant'}
+          {pending ? 'Analyse…' : <span className='inline-flex items-center gap-1.5'><Zap size={15} strokeWidth={2.5} /> Classer maintenant</span>}
         </button>
       </div>
       {msg ? (
