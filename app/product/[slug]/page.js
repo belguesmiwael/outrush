@@ -72,26 +72,55 @@ export default async function ProductPage({ params }) {
               <Countdown endsAt={flash.endsAt} serverNow={new Date().toISOString()} className="num-tension text-lg" />
             </div>
           ) : null}
-          <PriceReveal
-            productId={product.id}
-            marketPrice={flash ? product.outlet_price : product.market_price}
-            outletPrice={flash ? flash.price : product.outlet_price}
-            currency={product.currency}
-            locale={locale}
-            size="lg"
-          />
-
-          {sources.length ? (
-            <div className="card-hunt p-4 space-y-2">
-              <p className="text-xs uppercase tracking-widest text-app-muted">Prix vérifié — sources</p>
-              {sources.slice(0, 4).map((s, i) => (
-                <p key={i} className="text-sm text-app-muted">
-                  {s.source} · <Money amount={s.price} /> —{' '}
-                  {t(locale, 'verified_price')} {s.seen_at ? new Date(s.seen_at).toLocaleDateString('fr-FR') : '—'}
-                </p>
-              ))}
+          {flash ? (
+            <div className="space-y-2">
+              <div className="flex items-baseline gap-3 flex-wrap">
+                <span className="eyebrow">Prix marché</span>
+                <s className="num text-app-muted text-lg"><Money amount={product.market_price} /></s>
+              </div>
+              <div className="flex items-baseline gap-3 flex-wrap">
+                <span className="eyebrow">Prix OUTRUSH</span>
+                <s className="num text-app-muted text-lg"><Money amount={product.outlet_price} /></s>
+              </div>
+              <div className="flex items-baseline gap-3 flex-wrap">
+                <span className="eyebrow eyebrow-hot">Prix flash</span>
+                <span className="num-tension text-3xl font-semibold"><Money amount={flash.price} /></span>
+                {product.market_price ? (
+                  <span className="seal text-base">
+                    −{Math.round((1 - flash.price / product.market_price) * 100)}%
+                  </span>
+                ) : null}
+              </div>
             </div>
-          ) : null}
+          ) : (
+            <PriceReveal
+              productId={product.id}
+              marketPrice={product.market_price}
+              outletPrice={product.outlet_price}
+              currency={product.currency}
+              locale={locale}
+              size="lg"
+            />
+          )}
+
+          <div className="card-hunt p-4 space-y-2.5">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-app-success" />
+              <p className="text-xs uppercase tracking-widest text-app-success font-semibold">Meilleur prix constaté</p>
+            </div>
+            <p className="text-sm text-app-text leading-relaxed">
+              Nous scannons le marché pour trouver le prix le plus bas disponible
+              {sources.length && sources[0]?.price ? (
+                <> — constaté à <span className="num"><Money amount={sources[0].price} /></span>
+                {sources[0].seen_at ? <> le {new Date(sources[0].seen_at).toLocaleDateString('fr-FR')}</> : null}</>
+              ) : null}. Notre prix OUTRUSH passe encore en dessous.
+            </p>
+            <p className="text-sm text-app-muted leading-relaxed">
+              Ce prix très réduit vient de notre déstockage de produits neufs, jamais d'un défaut :
+              tous nos articles sont <span className="text-app-text font-medium">neufs, intacts et parfaitement valables</span>.
+              Vous payez moins simplement parce que nous écoulons des invendus et fins de série.
+            </p>
+          </div>
 
           <div className="flex gap-3 text-sm text-app-muted">
             <span className="px-3 py-1 rounded-full bg-app-surface-2 border border-white/5">
