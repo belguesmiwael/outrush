@@ -11,7 +11,14 @@ function mediaUrl(path) {
     : null;
 }
 
-const BUDGETS = [30, 50, 80, 120];
+// Paliers de budget ronds PAR DEVISE (affichés à l'utilisateur).
+// Le serveur travaille en USD, donc on reconvertit avant l'envoi.
+const BUDGET_TIERS = {
+  USD: [30, 50, 80, 120],
+  EUR: [30, 50, 80, 120],
+  TND: [50, 100, 150, 250],
+};
+const DEFAULT_TIERS = [30, 50, 80, 120];
 const UNIVERSES = [
   ['', 'Toutes catégories'],
   ['beaute', 'Beauté'],
@@ -23,6 +30,9 @@ const UNIVERSES = [
 export default function SurpriseBoxBuilder() {
   const cur = useCurrency();
   const [state, action, pending] = useActionState(composeSurpriseBox, null);
+  const tiers = BUDGET_TIERS[cur.currency] ?? DEFAULT_TIERS;
+  const rate = Number(cur.rate) || 1;
+  const sym = cur.currency === 'TND' ? 'DT' : cur.currency === 'EUR' ? '€' : '$';
 
   return (
     <div className="space-y-8">
@@ -30,11 +40,13 @@ export default function SurpriseBoxBuilder() {
         <div>
           <label className="text-sm text-app-muted block mb-3">Votre budget</label>
           <div className="grid grid-cols-4 gap-3">
-            {BUDGETS.map((b) => (
+            {tiers.map((b, i) => (
               <label key={b} className="relative cursor-pointer">
-                <input type="radio" name="budget" value={b} defaultChecked={b === 50} className="peer sr-only" />
+                {/* value = montant converti en USD pour le serveur (arrondi) */}
+                <input type="radio" name="budget" value={Math.round((b / rate) * 100) / 100}
+                  defaultChecked={i === 1} className="peer sr-only" />
                 <div className="rounded-xl border border-white/10 py-4 text-center font-display font-bold text-lg peer-checked:border-app-accent peer-checked:bg-[color:var(--app-accent)]/10 peer-checked:text-app-accent transition-colors duration-120">
-                  {b}$
+                  <span className="num">{b}</span> {sym}
                 </div>
               </label>
             ))}
