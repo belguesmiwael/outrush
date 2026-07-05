@@ -8,8 +8,8 @@ import SiteFooter from '@/components/shop/SiteFooter';
 import AddToCartButton from '@/components/shop/AddToCartButton';
 import LiveViewers from '@/components/shop/LiveViewers';
 import LiveStock from '@/components/shop/LiveStock';
+import Money from '@/components/shop/Money';
 import ProductGallery from '@/components/shop/ProductGallery';
-import { formatPrice } from '@/lib/utils';
 
 export const revalidate = 120;
 
@@ -67,7 +67,7 @@ export default async function ProductPage({ params }) {
               <p className="text-xs uppercase tracking-widest text-app-muted">Prix vérifié — sources</p>
               {sources.slice(0, 4).map((s, i) => (
                 <p key={i} className="text-sm text-app-muted">
-                  {s.source} · {formatPrice(s.price, product.currency, locale)} —{' '}
+                  {s.source} · <Money amount={s.price} /> —{' '}
                   {t(locale, 'verified_price')} {s.seen_at ? new Date(s.seen_at).toLocaleDateString('fr-FR') : '—'}
                 </p>
               ))}
