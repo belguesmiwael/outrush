@@ -34,9 +34,8 @@ export default function ProductCard({ product, locale = 'fr', index = 0, sold = 
           </div>
         )}
 
-        {/* Badges empilés en haut à gauche */}
+        {/* Rareté / tendance — TOUJOURS en haut à gauche (place fixe) */}
         <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1.5 items-start">
-          {product.flash ? <FlashBadge force /> : <FlashBadge productId={product.id} />}
           {rare ? (
             <span
               className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full backdrop-blur ${
@@ -55,6 +54,10 @@ export default function ProductCard({ product, locale = 'fr', index = 0, sold = 
               🔥 Tendance
             </span>
           ) : null}
+        </div>
+        {/* Flash — en haut à DROITE, ne déplace jamais la rareté */}
+        <div className="absolute top-2.5 right-2.5 z-10">
+          {product.flash ? <FlashBadge force /> : <FlashBadge productId={product.id} />}
         </div>
 
         <CardActions product={product} />

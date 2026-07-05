@@ -513,3 +513,43 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
 
 /* Le texte ne déborde jamais des cartes */
 .card-premium, .card-hunt { overflow-wrap: break-word; }
+
+/* ═══════════════════════════════════════════════════════
+   CARTE FLASH — style distinct des cartes normales
+   ═══════════════════════════════════════════════════════ */
+.card-flash {
+  position: relative;
+  background: linear-gradient(158deg, oklch(21% 0.03 25), oklch(16% 0.02 25));
+  border: 1px solid oklch(62% 0.24 25 / 0.28);
+  border-radius: var(--r-lg);
+  box-shadow: 0 0 0 1px oklch(62% 0.24 25 / 0.06), 0 8px 28px oklch(0% 0 0 / 0.4),
+              0 0 40px oklch(62% 0.24 25 / 0.10);
+  transition: box-shadow var(--dur-enter) var(--ease-out-expo), border-color var(--dur-enter) var(--ease-out-expo), transform var(--dur-enter) var(--ease-out-expo);
+}
+.card-flash:hover {
+  border-color: oklch(62% 0.24 25 / 0.5);
+  box-shadow: 0 0 0 1px oklch(62% 0.24 25 / 0.12), 0 14px 40px oklch(0% 0 0 / 0.5),
+              0 0 64px oklch(62% 0.24 25 / 0.20);
+  transform: translateY(-2px);
+}
+/* Filet de tension animé en haut de la carte flash */
+.card-flash::before {
+  content: "";
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--app-accent), transparent);
+  background-size: 200% 100%;
+  animation: tension-scan 3s var(--ease-out-expo) infinite;
+  z-index: 6; border-radius: var(--r-lg) var(--r-lg) 0 0;
+}
+@media (prefers-reduced-motion: reduce) { .card-flash::before { animation: none; } }
+
+/* Badge Flash — pilule tension nette */
+.flash-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 999px;
+  font-family: var(--app-font-mono); font-size: 9px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: white;
+  background: linear-gradient(180deg, var(--app-accent-hi), var(--app-accent));
+  box-shadow: 0 2px 8px oklch(62% 0.24 25 / 0.4);
+}

@@ -4,10 +4,11 @@ import { useCart } from '@/lib/cart/CartContext';
 import { useQuickLook } from '@/lib/quicklook/QuickLookContext';
 
 /** Superposé sur la carte produit : quick look (hover) + ajout panier + qté au panier. */
-export default function CardActions({ product }) {
+export default function CardActions({ product, quickLookPos = 'top-right' }) {
   const { add, items } = useCart();
   const { open } = useQuickLook();
   const [pulse, setPulse] = useState(false);
+  const qlCls = quickLookPos === 'top-left' ? 'top-2.5 left-2.5' : 'top-2.5 right-2.5';
 
   const inCart = items.find((i) => i.id === product.id)?.qty ?? 0;
   const soldOut = (product.quantity ?? 0) < 1;
@@ -32,7 +33,7 @@ export default function CardActions({ product }) {
       {/* Quick look — apparaît au survol de l'image */}
       <button
         onClick={onQuickLook}
-        className="absolute top-2.5 right-2.5 z-10 rounded-full glass px-3 py-1.5 text-xs font-medium opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-220 ease-out-expo"
+        className={`absolute ${qlCls} z-20 rounded-full glass px-3 py-1.5 text-xs font-medium opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-220 ease-out-expo`}
       >
         👁 Aperçu
       </button>
