@@ -35,9 +35,10 @@ export function CartProvider({ children }) {
         title: product.title,
         brand: product.brand,
         image: (product.images ?? [])[0] ?? null,
-        outlet_price: Number(product.outlet_price),
+        outlet_price: Number(product.flash?.price ?? product.outlet_price),
+        is_flash: Boolean(product.flash),
         currency: product.currency ?? 'USD',
-        max: product.quantity ?? 99,
+        max: product.flash?.remaining ?? product.quantity ?? 99,
         qty,
       }];
     });

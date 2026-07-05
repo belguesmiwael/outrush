@@ -8,6 +8,8 @@ import SiteFooter from '@/components/shop/SiteFooter';
 import AddToCartButton from '@/components/shop/AddToCartButton';
 import LiveViewers from '@/components/shop/LiveViewers';
 import LiveStock from '@/components/shop/LiveStock';
+import Countdown from '@/components/shop/Countdown';
+import FlashBadge from '@/components/shop/FlashBadge';
 import Money from '@/components/shop/Money';
 import ProductGallery from '@/components/shop/ProductGallery';
 
@@ -27,6 +29,15 @@ export default async function ProductPage({ params }) {
     .maybeSingle();
 
   if (!product) notFound();
+
+  // Prix flash actif de ce produit (si en vente flash)
+  const { data: flashRow } = await supabase
+    .from('active_flash_products')
+    .select('flash_price, remaining_qty, ends_at')
+    .eq('product_id', product.id)
+    .maybeSingle();
+  const flash = flashRow ? { price: Number(flashRow.flash_price), remaining: flashRow.remaining_qty, endsAt: flashRow.ends_at } : null;
+  if (flash) product.flash = flash;
 
   // Incrément de vue réel (fire-and-forget) + ventes réelles 24h
   supabase.rpc('bump_product_views', { p_id: product.id }).then(() => {});
@@ -54,9 +65,16 @@ export default async function ProductPage({ params }) {
             <p className="text-xs uppercase tracking-widest text-app-muted">{product.brand}</p>
           ) : null}
           <h1 className="font-display font-bold text-3xl leading-tight">{localized(product.title, locale)}</h1>
+          {flash ? (
+            <div className="flex items-center gap-3 flex-wrap">
+              <FlashBadge />
+              <span className="eyebrow eyebrow-hot">Fin du drop</span>
+              <Countdown endsAt={flash.endsAt} serverNow={new Date().toISOString()} className="num-tension text-lg" />
+            </div>
+          ) : null}
           <PriceReveal
-            marketPrice={product.market_price}
-            outletPrice={product.outlet_price}
+            marketPrice={flash ? product.outlet_price : product.market_price}
+            outletPrice={flash ? flash.price : product.outlet_price}
             currency={product.currency}
             locale={locale}
             size="lg"

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import SiteHeader from '@/components/shop/SiteHeader';
 import SiteFooter from '@/components/shop/SiteFooter';
 import ProductCard from '@/components/shop/ProductCard';
+import { getActiveFlashMap, withFlash } from '@/lib/flash/active';
 import ShopFilters from '@/components/shop/ShopFilters';
 import CategoryIcon from '@/components/shop/CategoryIcon';
 import Link from 'next/link';
@@ -49,6 +50,8 @@ export default async function ShopPage({ searchParams }) {
 
   let { data: products } = await query;
   products = products ?? [];
+  const flashMap = await getActiveFlashMap();
+  products = products.map((p) => withFlash(p, flashMap));
 
   // Tri par remise en mémoire
   if (sort === 'discount') {

@@ -7,6 +7,7 @@ import Countdown from '@/components/shop/Countdown';
 import RotationTimer from '@/components/shop/RotationTimer';
 import LiveStockGauge from '@/components/shop/LiveStockGauge';
 import ProductCard from '@/components/shop/ProductCard';
+import { getActiveFlashMap, withFlash } from '@/lib/flash/active';
 import PriceReveal from '@/components/shop/PriceReveal';
 import SiteHeader from '@/components/shop/SiteHeader';
 import SiteFooter from '@/components/shop/SiteFooter';
@@ -55,12 +56,15 @@ export default async function HomePage() {
   ]);
 
   // Meilleure remise du catalogue → mise en avant hero
+  const flashMap = await getActiveFlashMap();
+  const productsF = (products ?? []).map((p) => withFlash(p, flashMap));
+  const bestSellersF = (bestSellers ?? []).map((p) => withFlash(p, flashMap));
   const topDeal = (products ?? [])
     .map((p) => ({ p, pct: discountPct(p.market_price, p.outlet_price) ?? 0 }))
     .sort((a, b) => b.pct - a.pct)[0];
   // Le Rush du jour : sélection déterministe qui tourne chaque nuit
   const dailyRush = pickDailyRush(
-    (products ?? []).filter((p) => (p.quantity ?? 1) > 0),
+    productsF.filter((p) => (p.quantity ?? 1) > 0),
     8
   );
   const rotationSeconds = secondsUntilRotation();
@@ -134,14 +138,14 @@ export default async function HomePage() {
       ) : null}
 
       {/* BEST-SELLERS — rail dense horizontal */}
-      {bestSellers?.length ? (
+      {bestSellersF?.length ? (
         <section className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-baseline justify-between mb-4">
             <h2 className="font-display font-bold text-2xl">Les plus chassés</h2>
             <span className="text-sm text-app-muted">tendances en ce moment</span>
           </div>
           <div className="flex gap-4 overflow-x-auto no-scrollbar pb-3 snap-x items-stretch">
-            {bestSellers.map((p, i) => (
+            {bestSellersF.map((p, i) => (
               <div key={p.id} className="snap-start shrink-0 w-44 sm:w-48 flex">
                 <ProductCard product={p} locale={locale} index={i} sold={soldById.get(p.id) ?? 0} />
               </div>
@@ -257,9 +261,9 @@ export default async function HomePage() {
       <section className="max-w-7xl mx-auto px-4 py-10">
         <h2 className="font-display font-bold text-3xl mb-2">Tout le catalogue</h2>
         <p className="text-app-muted mb-8">Prix réels vérifiés multi-sources. Remises scellées, pas promises.</p>
-        {products?.length ? (
+        {productsF?.length ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">
-            {products.map((p, i) => (
+            {productsF.map((p, i) => (
               <ProductCard key={p.id} product={p} locale={locale} index={i} sold={soldById.get(p.id) ?? 0} />
             ))}
           </div>
