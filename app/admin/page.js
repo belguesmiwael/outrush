@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { localized } from '@/lib/i18n/dictionaries';
 import { formatPrice } from '@/lib/utils';
 import AdminCommandBar from '@/components/admin/AdminCommandBar';
+import StockClassifier from '@/components/admin/StockClassifier';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,6 +60,9 @@ export default async function AdminDashboard() {
 
       {/* AI Brain */}
       <AdminCommandBar />
+
+      {/* Classification stock + packs */}
+      <StockClassifier />
 
       {/* Tuiles live */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
