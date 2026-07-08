@@ -57,9 +57,9 @@ export default async function ProductPage({ params }) {
   const sources = Array.isArray(product.market_sources) ? product.market_sources : [];
 
   return (
-    <>
+    <div className="min-h-dvh flex flex-col">
       <SiteHeader locale={locale} />
-      <main className="min-h-dvh max-w-6xl mx-auto px-4 py-6 md:py-8 safe-x">
+      <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-6 md:py-8 safe-x">
         <Link href="/" className="text-sm text-app-muted hover:text-app-text transition-colors duration-120">
           ← OUTRUSH
         </Link>
@@ -185,6 +185,6 @@ export default async function ProductPage({ params }) {
       </div>
       </main>
       <SiteFooter />
-    </>
+    </div>
   );
 }

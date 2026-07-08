@@ -55,7 +55,7 @@ export function CartProvider({ children }) {
     }
   }, [items, hydrated]);
 
-  const add = useCallback((product, qty = 1) => {
+  const add = useCallback((product, qty = 1, opts = {}) => {
     reserve(product.id, qty);
     setItems((prev) => {
       const existing = prev.find((i) => i.id === product.id);
@@ -75,7 +75,7 @@ export function CartProvider({ children }) {
         qty,
       }];
     });
-    setOpen(true);
+    if (opts.openDrawer !== false) setOpen(true);
   }, []);
 
   const remove = useCallback((id) => { release(id); setItems((prev) => prev.filter((i) => i.id !== id)); }, []);

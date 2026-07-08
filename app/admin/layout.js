@@ -6,10 +6,10 @@ import RegieNav from '@/components/admin/RegieNav';
 const NAV = [
   { href: '/admin', label: 'Le bureau' },
   { href: '/admin/scan', label: 'Scanner' },
-  { href: '/admin/products', label: 'Les lots' },
+  { href: '/admin/products', label: 'Produits' },
   { href: '/admin/orders', label: 'Commandes' },
-  { href: '/admin/products/new', label: '+ Cataloguer un lot' },
-  { href: '/ops/stock', label: 'Stock Intelligence' },
+  { href: '/admin/products/new', label: '+ Cataloguer un produit' },
+  { href: '/admin/stock', label: 'Stock Intelligence' },
   { href: '/admin/flash', label: 'Vacations' },
   { href: '/admin/settings', label: 'Réglages' },
 ];

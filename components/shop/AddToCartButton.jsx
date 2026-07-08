@@ -6,7 +6,7 @@ import { playGavel } from '@/lib/sound/gavel';
 
 // LA CRIÉE — le CTA d'acquisition sur la fiche : « Remporter ce lot ».
 // Au succès : le marteau tombe (secousse sèche) + « Adjugé, à vous » + son opt-in.
-export default function AddToCartButton({ product, className = '', label = 'Remporter ce lot' }) {
+export default function AddToCartButton({ product, className = '', label = 'Remporter' }) {
   const { add } = useCart();
   const [won, setWon] = useState(false);
 

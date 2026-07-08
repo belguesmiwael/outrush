@@ -4,7 +4,8 @@ import { localized, t } from '@/lib/i18n/dictionaries';
 import Countdown from '@/components/shop/Countdown';
 import FlashCard from '@/components/shop/FlashCard';
 import VacationLive from '@/components/shop/VacationLive';
-import { Gavel } from 'lucide-react';
+import CartButton from '@/components/shop/CartButton';
+import { Gavel, ArrowLeft } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,8 +24,14 @@ export default async function FlashPage() {
   );
 
   return (
-    <main className="min-h-dvh max-w-7xl mx-auto px-4 py-8 space-y-14">
-      <Link href="/" className="text-sm text-app-muted hover:text-app-text transition-colors duration-120">← OUTRUSH</Link>
+    <main className="min-h-dvh max-w-7xl mx-auto px-4 pb-16 space-y-14">
+      {/* Chrome minimal : uniquement retour accueil + panier (immersion vacation) */}
+      <div className="sticky top-0 z-50 -mx-4 px-4 h-14 flex items-center justify-between glass safe-t">
+        <Link href="/" className="inline-flex items-center gap-2 text-sm text-app-muted hover:text-app-text transition-colors duration-120">
+          <ArrowLeft size={18} strokeWidth={2} /> Accueil
+        </Link>
+        <CartButton />
+      </div>
 
       {(sales ?? []).length === 0 ? (
         <div className="card-lot p-16 text-center space-y-4">

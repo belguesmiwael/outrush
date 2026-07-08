@@ -21,7 +21,7 @@ export default function CardActions({ product, quickLookPos = 'top-right' }) {
     e.preventDefault();
     e.stopPropagation();
     if (soldOut) return;
-    add(product, 1);
+    add(product, 1, { openDrawer: false });
     playGavel();            // opt-in : muet si le son de la salle n'est pas activé
     setAdjuge(true);
     if (timer.current) clearTimeout(timer.current);

@@ -21,7 +21,7 @@ export default async function RushPage() {
     return (
       <main className="min-h-dvh grid place-items-center bg-app-bg text-center p-6">
         <div className="space-y-3">
-          <div className="font-display text-6xl text-app-accent opacity-40">⏱</div>
+          <div className="font-display text-5xl text-app-loot opacity-40">&mdash;</div>
           <p className="text-app-muted">Le flux est vide — le prochain drop arrive.</p>
         </div>
       </main>

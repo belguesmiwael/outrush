@@ -2,7 +2,9 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { localized } from '@/lib/i18n/dictionaries';
-import { formatPrice } from '@/lib/utils';
+import Money from '@/components/shop/Money';
+import LotNumber from '@/components/shop/LotNumber';
+import RemporterLotButton from '@/components/shop/RemporterLotButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,9 +37,10 @@ export default async function PackPage({ params }) {
 
   return (
     <main className="max-w-5xl mx-auto px-4 py-10 space-y-10">
+      <Link href="/" className="text-sm text-app-muted hover:text-app-text transition-colors duration-120">← OUTRUSH</Link>
       <div className="grid md:grid-cols-2 gap-8 items-start">
         {/* Visuel composé */}
-        <div className="rounded-2xl overflow-hidden bg-app-surface relative aspect-[3/2]">
+        <div className="rounded-2xl overflow-hidden bg-app-surface relative aspect-[3/2] card-lot">
           {img ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={img} alt={localized(pack.title, 'fr')} className="w-full h-full object-cover" />
@@ -56,11 +59,15 @@ export default async function PackPage({ params }) {
               })}
             </div>
           )}
-          <span className="absolute top-4 left-4 seal">PACK −{savingPct}%</span>
+          <span className="absolute top-4 left-4 seal">LOT −{savingPct}%</span>
         </div>
 
         {/* Détail */}
         <div className="space-y-5">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <LotNumber product={pack} />
+            <span className="eyebrow">Assemblé par la maison</span>
+          </div>
           <h1 className="font-display font-extrabold text-3xl leading-tight">
             {localized(pack.title, 'fr')}
           </h1>
@@ -68,31 +75,25 @@ export default async function PackPage({ params }) {
             <p className="text-app-muted leading-relaxed">{localized(pack.narrative, 'fr')}</p>
           ) : null}
 
-          <div className="card-hunt p-5 space-y-2">
+          <div className="card-lot p-5 space-y-2">
             <p className="text-sm text-app-muted line-through">
-              Acheté séparément : {formatPrice(sumOutlet, 'USD')}
+              Aux enchères séparées : <Money amount={sumOutlet} />
             </p>
-            <p className="font-display font-extrabold text-4xl text-app-accent price-reveal">
-              {formatPrice(pack.pack_price, 'USD')}
+            <p className="marteau-price text-4xl loot-drop">
+              <Money amount={pack.pack_price} />
             </p>
             <p className="text-sm text-app-success">
-              Économie : {formatPrice(saving, 'USD')} (−{savingPct}%)
+              Vous remportez <Money amount={saving} /> (−{savingPct}%)
             </p>
           </div>
 
-          {inStock ? (
-            <button className="w-full font-display font-bold text-lg rounded-xl py-4 bg-app-accent text-white transition-transform duration-[220ms] hover:scale-[1.01] active:scale-[0.98]">
-              Ajouter le pack au panier
-            </button>
-          ) : (
-            <p className="text-app-accent font-medium">Une pièce du pack vient de partir — pack indisponible.</p>
-          )}
+          <RemporterLotButton items={items} packPrice={pack.pack_price} sumOutlet={sumOutlet} inStock={inStock} />
         </div>
       </div>
 
       {/* Composition */}
       <section className="space-y-4">
-        <h2 className="font-display font-bold text-xl">Dans ce pack ({items.length})</h2>
+        <h2 className="font-display font-bold text-xl">Dans ce lot ({items.length})</h2>
         <div className="grid sm:grid-cols-2 gap-4">
           {items.map((it) => {
             const p = it.product;
@@ -101,7 +102,7 @@ export default async function PackPage({ params }) {
               <Link
                 key={p.id}
                 href={`/product/${p.slug}`}
-                className="card-hunt p-4 flex gap-4 items-center hover:ring-1 hover:ring-[color:var(--app-accent)]/40 transition-all duration-[220ms]"
+                className="card-lot p-4 flex gap-4 items-center hover:ring-1 hover:ring-[color:var(--app-loot)]/40 transition-all duration-[220ms]"
               >
                 <div className="w-16 h-20 rounded-lg overflow-hidden bg-app-surface-2 shrink-0">
                   {pImg ? (
@@ -115,7 +116,7 @@ export default async function PackPage({ params }) {
                   ) : null}
                   <p className="font-medium leading-snug line-clamp-2">{localized(p.title, 'fr')}</p>
                   <p className="text-sm mt-1">
-                    {formatPrice(p.outlet_price, p.currency)}{' '}
+                    <Money amount={p.outlet_price} />{' '}
                     <span className="text-xs text-app-muted">· ×{it.qty} · {it.role === 'hero' ? 'pièce vedette' : 'pièce rare'}</span>
                   </p>
                 </div>
