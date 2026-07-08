@@ -2,7 +2,9 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { localized, t } from '@/lib/i18n/dictionaries';
-import PriceReveal from '@/components/shop/PriceReveal';
+import LotReveal from '@/components/shop/LotReveal';
+import LotNumber from '@/components/shop/LotNumber';
+import { Eye, Check } from 'lucide-react';
 import SiteHeader from '@/components/shop/SiteHeader';
 import SiteFooter from '@/components/shop/SiteFooter';
 import AddToCartButton from '@/components/shop/AddToCartButton';
@@ -62,50 +64,35 @@ export default async function ProductPage({ params }) {
           ← OUTRUSH
         </Link>
       <div className="grid md:grid-cols-2 gap-6 md:gap-10 mt-4 md:mt-6">
-        <ProductGallery images={images} alt={localized(product.title, locale)} />
+        <div className="relative">
+          <div className="spotlight-sweep rounded-[22px]" aria-hidden="true" />
+          <ProductGallery images={images} alt={localized(product.title, locale)} />
+        </div>
 
         <div className="space-y-6">
-          {product.brand ? (
-            <p className="text-xs uppercase tracking-widest text-app-muted">{product.brand}</p>
-          ) : null}
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <LotNumber product={product} />
+            {product.brand ? (
+              <span className="text-xs uppercase tracking-widest text-app-muted">{product.brand}</span>
+            ) : null}
+          </div>
           <h1 className="font-display font-bold text-3xl leading-tight">{localized(product.title, locale)}</h1>
           {flash ? (
             <div className="flex items-center gap-3 flex-wrap">
               <FlashBadge force />
-              <span className="eyebrow eyebrow-hot">Fin du drop</span>
-              <Countdown endsAt={flash.endsAt} serverNow={new Date().toISOString()} className="num-tension text-lg" />
+              <span className="eyebrow eyebrow-hot">Clôture de la vacation</span>
+              <Countdown endsAt={flash.endsAt} serverNow={new Date().toISOString()} className="chrono-vacation text-lg" />
             </div>
           ) : null}
-          {flash ? (
-            <div className="space-y-2">
-              <div className="flex items-baseline gap-3 flex-wrap">
-                <span className="eyebrow">Prix marché</span>
-                <s className="num text-app-muted text-lg"><Money amount={product.market_price} /></s>
-              </div>
-              <div className="flex items-baseline gap-3 flex-wrap">
-                <span className="eyebrow">Prix OUTRUSH</span>
-                <s className="num text-app-muted text-lg"><Money amount={product.outlet_price} /></s>
-              </div>
-              <div className="flex items-baseline gap-3 flex-wrap">
-                <span className="eyebrow eyebrow-hot">Prix flash</span>
-                <span className="num-tension text-3xl font-semibold"><Money amount={flash.price} /></span>
-                {product.market_price ? (
-                  <span className="seal text-base">
-                    −{Math.round((1 - flash.price / product.market_price) * 100)}%
-                  </span>
-                ) : null}
-              </div>
-            </div>
-          ) : (
-            <PriceReveal
-              productId={product.id}
-              marketPrice={product.market_price}
-              outletPrice={product.outlet_price}
-              currency={product.currency}
-              locale={locale}
-              size="lg"
-            />
-          )}
+
+          {/* Révélation du lot : le prix appelé en escalade */}
+          <LotReveal
+            productId={product.id}
+            marketPrice={product.market_price}
+            outletPrice={product.outlet_price}
+            flashPrice={flash ? flash.price : null}
+            currency={product.currency}
+          />
 
           <div className="card-hunt p-4 space-y-2.5">
             <div className="flex items-center gap-2">
@@ -146,7 +133,7 @@ export default async function ProductPage({ params }) {
             <ul className="space-y-1.5">
               {product.specs._highlights[locale].map((h, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm">
-                  <span className="text-app-accent mt-0.5">✓</span>
+                  <Check size={14} strokeWidth={2.5} className="text-app-loot mt-0.5 shrink-0" />
                   <span>{h}</span>
                 </li>
               ))}
@@ -175,7 +162,7 @@ export default async function ProductPage({ params }) {
           <div className="flex flex-wrap gap-2 text-xs items-center">
             <LiveStock productId={product.id} initial={product.quantity} />
             {product.views > 0 ? (
-              <span className="px-2.5 py-1 rounded-full bg-white/5 text-app-muted">👁 <span className="num">{product.views}</span> vues</span>
+              <span className="px-2.5 py-1 rounded-full bg-white/5 text-app-muted inline-flex items-center gap-1.5"><Eye size={12} strokeWidth={2} /> <span className="num">{product.views}</span> vues</span>
             ) : null}
             <LiveViewers productId={product.id} />
           </div>

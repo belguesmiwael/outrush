@@ -868,3 +868,50 @@ body {
 @keyframes call-pulse { 0%,100% { opacity: 0.85; } 50% { opacity: 1; text-shadow: 0 0 24px oklch(68% 0.20 45 / 0.6); } }
 .call-pulse { animation: call-pulse 1.2s var(--ease-out-expo) infinite; }
 @media (prefers-reduced-motion: reduce) { .call-pulse { animation: none; } }
+
+/* ═══════════════════════════════════════════════════════════════════
+   LA CRIÉE — Révélation du lot (fiche) + La régie (/ops, /admin)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Escalade du prix : chaque palier atterrit en fondu-montée ── */
+@keyframes escalade-in { 0% { opacity: 0; transform: translateY(9px); } 100% { opacity: 1; transform: translateY(0); } }
+.escalade-in { animation: escalade-in var(--dur-reveal) var(--ease-out-expo) both; }
+@media (prefers-reduced-motion: reduce) { .escalade-in { animation: none; opacity: 1; transform: none; } }
+
+/* Le prix « au marteau » : ember, atterrissage appuyé */
+.marteau-price { color: var(--maison-ember-hi); font-family: var(--app-font-mono); font-weight: 700;
+  letter-spacing: -0.02em; text-shadow: 0 0 26px oklch(68% 0.20 45 / 0.28); }
+
+/* ── La régie : châssis backstage laiton-sur-velours (distinct de la salle) ── */
+.regie-aside {
+  background:
+    radial-gradient(ellipse 80% 30% at 50% 0%, oklch(78% 0.13 85 / 0.06), transparent 60%),
+    linear-gradient(180deg, oklch(20% 0.07 25), oklch(13% 0.02 30));
+  border-color: oklch(78% 0.13 85 / 0.18) !important;
+}
+.regie-sub { font-family: var(--app-font-mono); letter-spacing: 0.3em; color: var(--maison-brass); }
+.regie-nav-item {
+  position: relative; font-family: var(--app-font-mono); font-size: 0.78rem; letter-spacing: 0.02em;
+  border: 1px solid transparent;
+}
+.regie-nav-item:hover { color: var(--maison-brass-hi); background: oklch(78% 0.13 85 / 0.07); border-color: oklch(78% 0.13 85 / 0.2); }
+.regie-nav-item[data-active="true"] {
+  color: var(--maison-brass-hi); background: oklch(78% 0.13 85 / 0.10); border-color: oklch(78% 0.13 85 / 0.3);
+}
+.regie-nav-item[data-active="true"]::before {
+  content: ""; position: absolute; left: 0; top: 20%; bottom: 20%; width: 2px; border-radius: 2px;
+  background: var(--maison-brass);
+}
+/* Tuile de régie : instrument laiton sur velours */
+.regie-tile {
+  position: relative; border-radius: var(--r-lg);
+  background: linear-gradient(158deg, var(--maison-surface), var(--maison-bg-deep));
+  border: 1px solid oklch(78% 0.13 85 / 0.18);
+  transition: transform var(--dur-enter) var(--ease-out-expo), border-color var(--dur-enter) var(--ease-out-expo), box-shadow var(--dur-enter) var(--ease-out-expo);
+}
+.regie-tile:hover { transform: translateY(-3px); border-color: oklch(78% 0.13 85 / 0.42); box-shadow: var(--el-3); }
+.regie-tile .tile-n { font-family: var(--app-font-mono); font-weight: 700; font-size: 3rem; line-height: 1;
+  color: var(--maison-brass-hi); letter-spacing: -0.02em; }
+.regie-tile.tile-hot .tile-n { color: var(--maison-ember-hi); }
+.regie-tile .tile-k { font-family: var(--app-font-mono); font-size: 0.66rem; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--app-text-muted); }
