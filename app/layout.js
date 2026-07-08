@@ -1,4 +1,4 @@
-import { Bricolage_Grotesque, Onest, Martian_Mono } from 'next/font/google';
+import { Fraunces, Onest, Martian_Mono } from 'next/font/google';
 import './globals.css';
 import { CartProvider } from '@/lib/cart/CartContext';
 import CartDrawer from '@/components/shop/CartDrawer';
@@ -10,13 +10,16 @@ import { FlashLiveProvider } from '@/lib/flash/FlashLiveContext';
 import { getActiveFlashMap } from '@/lib/flash/active';
 import { getCurrencySettings } from '@/lib/currency/server';
 
-const display = Bricolage_Grotesque({
+// LA CRIÉE — Fraunces (serif chaud, axes SOFT+WONK) : la voix de la maison de ventes.
+// L'anti-Inter absolu. Titres de lot, hero, cachet « ADJUGÉ ».
+const display = Fraunces({
   subsets: ['latin'],
   variable: '--app-font-display',
-  weight: ['400', '600', '700', '800'],
+  axes: ['SOFT', 'WONK', 'opsz'],
   display: 'swap',
 });
 
+// Corps : Onest (neutre chaude, non-réflexe).
 const body = Onest({
   subsets: ['latin'],
   variable: '--app-font-body',
@@ -24,6 +27,7 @@ const body = Onest({
   display: 'swap',
 });
 
+// Registre de la maison : n° de lot, prix au marteau, chrono.
 const mono = Martian_Mono({
   subsets: ['latin'],
   variable: '--app-font-mono',
@@ -32,15 +36,15 @@ const mono = Martian_Mono({
 });
 
 export const metadata = {
-  title: 'OUTRUSH — La traque chronométrée',
-  description: 'La marketplace outlet mondiale. Invendus et fins de série premium, rythmés par des ventes flash.',
+  title: 'OUTRUSH — La maison de ventes de l’invendu',
+  description: 'L’hôtel des ventes de l’invendu de luxe. Chaque produit est un lot catalogué, chaque drop une vacation en direct — adjugé, à vous.',
   manifest: '/manifest.json',
 };
 
 export const dynamic = 'force-dynamic';
 
 export const viewport = {
-  themeColor: '#14141a',
+  themeColor: '#191410',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,

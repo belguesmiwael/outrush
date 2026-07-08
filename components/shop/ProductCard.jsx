@@ -5,6 +5,8 @@ import PriceReveal from './PriceReveal';
 import FlashBadge from './FlashBadge';
 import { Flame, ShoppingBag } from 'lucide-react';
 import CardActions from './CardActions';
+import LotNumber from './LotNumber';
+import SoldSeal from './SoldSeal';
 
 export default function ProductCard({ product, locale = 'fr', index = 0, sold = 0 }) {
   const img = Array.isArray(product.images) ? product.images[0] : null;
@@ -13,11 +15,12 @@ export default function ProductCard({ product, locale = 'fr', index = 0, sold = 
     : null;
   const rare = scarcity(product);
   const trending = Number(product.velocity_14d ?? 0) >= 3 || sold >= 3;
+  const soldOut = (product.quantity ?? 0) < 1;
 
   return (
     <Link
       href={`/product/${product.slug}`}
-      className="card-premium rise-in group flex flex-col h-full"
+      className="card-lot rise-in group flex flex-col h-full"
       style={{ animationDelay: `${Math.min(index * 40, 400)}ms` }}
     >
       <div className="aspect-[4/5] bg-app-surface-2 relative overflow-hidden shrink-0">
@@ -61,11 +64,21 @@ export default function ProductCard({ product, locale = 'fr', index = 0, sold = 
           {product.flash ? <FlashBadge force /> : <FlashBadge productId={product.id} />}
         </div>
 
-        <CardActions product={product} />
+        {/* № de LOT — plaque de catalogue en bas-gauche (le lot est catalogué, fini) */}
+        <LotNumber product={product} className="absolute bottom-2.5 left-2.5 z-10" />
+
+        {/* Lot épuisé : cachet ADJUGÉ · VENDU (preuve de désir, pas un cul-de-sac gris) */}
+        {soldOut ? (
+          <div className="absolute inset-0 z-20 grid place-items-center bg-black/45 backdrop-blur-[1px]">
+            <SoldSeal variant="sold" />
+          </div>
+        ) : (
+          <CardActions product={product} />
+        )}
 
         <div
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-220 ease-out-expo pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse at 50% 100%, oklch(62% 0.24 25 / 0.15), transparent 60%)' }}
+          style={{ background: 'radial-gradient(ellipse at 50% 100%, oklch(68% 0.20 45 / 0.15), transparent 60%)' }}
         />
       </div>
       <div className="p-4 flex flex-col flex-1 gap-2">

@@ -553,3 +553,207 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
   background: linear-gradient(180deg, var(--app-accent-hi), var(--app-accent));
   box-shadow: 0 2px 8px oklch(62% 0.24 25 / 0.4);
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   LA CRIÉE — l'hôtel des ventes de l'invendu de luxe
+   Couche d'identité appendée : override propre & 100% réversible.
+   velours oxblood + laiton + ember + parchemin · Fraunces · marteau
+   (supprimer ce bloc = retour à TERMINAL VELVET, zéro composant cassé)
+   ═══════════════════════════════════════════════════════════════════ */
+:root {
+  /* — Palette maison (source de vérité couleur) — */
+  --maison-bg:          oklch(15% 0.018 40);   /* brun-noir chaud : la salle dans l'ombre */
+  --maison-bg-deep:     oklch(12% 0.015 40);
+  --maison-velvet:      oklch(26% 0.10 25);    /* oxblood velours : tenture */
+  --maison-velvet-deep: oklch(20% 0.07 25);
+  --maison-surface:     oklch(22% 0.028 32);   /* surface veloutée chaude */
+  --maison-surface-2:   oklch(27% 0.032 30);
+  --maison-brass:       oklch(78% 0.13 85);    /* LAITON : cadres, plaque, marteau, sceau */
+  --maison-brass-hi:    oklch(87% 0.14 88);    /* laiton poli : reflet */
+  --maison-brass-soft:  oklch(78% 0.07 85);
+  --maison-ember:       oklch(68% 0.20 45);    /* EMBER : le lot sous le spot, l'urgence (hue 45, plus chaud que 25) */
+  --maison-ember-hi:    oklch(74% 0.21 48);
+  --maison-parchment:   oklch(93% 0.03 85);    /* parchemin : papier du catalogue */
+  --maison-parchment-d: oklch(87% 0.035 82);
+  --maison-text:        oklch(94% 0.01 70);    /* ivoire chaud, jamais blanc pur */
+  --maison-text-muted:  oklch(70% 0.015 55);
+
+  /* — Migration douce : les tokens applicatifs pointent sur la maison — */
+  --app-bg:          var(--maison-bg);
+  --app-surface:     var(--maison-surface);
+  --app-surface-2:   var(--maison-surface-2);
+  --app-text:        var(--maison-text);
+  --app-text-muted:  var(--maison-text-muted);
+  --app-accent:      var(--maison-ember);        /* urgence chaude — le lot sous le projecteur */
+  --app-accent-soft: oklch(68% 0.11 45);
+  --app-accent-hi:   var(--maison-ember-hi);
+  --app-loot:        var(--maison-brass);        /* le butin, la valeur remportée */
+  --app-loot-soft:   var(--maison-brass-soft);
+  --app-line:        oklch(78% 0.13 85 / 0.14);  /* filet laiton discret (cadre de lot) */
+  --app-line-strong: oklch(78% 0.13 85 / 0.32);
+  --app-success:     oklch(72% 0.15 150);
+
+  /* Rappel : le vermillon (hue 25) reste RATIONNÉ = tension pure (dernière pièce,
+     filet flash). L'ember (hue 45) = l'accent/CTA de la maison. Deux températures,
+     deux sens : ember appelle, vermillon alarme, laiton récompense. */
+
+  /* — La physique du marteau : descente rapide + micro-rebond sec — */
+  --ease-hammer: cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+/* ── La salle : brun-noir velours, spot chaud, tenture, vignette d'ombre ── */
+body {
+  background-color: var(--maison-bg);
+  background-image:
+    /* projecteur chaud de la salle (le spot au-dessus du pupitre) */
+    radial-gradient(ellipse 68% 52% at 50% -6%, oklch(78% 0.13 85 / 0.11), transparent 55%),
+    /* le lot éclairé (ember) qui monte du bas */
+    radial-gradient(ellipse 92% 60% at 50% 110%, oklch(68% 0.20 45 / 0.07), transparent 60%),
+    /* tentures de velours oxblood sur les flancs */
+    radial-gradient(ellipse 42% 95% at 100% 50%, oklch(26% 0.10 25 / 0.28), transparent 62%),
+    radial-gradient(ellipse 42% 95% at 0% 50%, oklch(26% 0.10 25 / 0.22), transparent 62%),
+    /* vignette : les bords de la salle plongés dans l'ombre */
+    radial-gradient(ellipse 125% 125% at 50% 38%, transparent 52%, oklch(7% 0.012 40 / 0.62)),
+    /* grain velours discret */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='v'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23v)' opacity='0.035'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+}
+
+/* ── Plaque de catalogue : parchemin + filet laiton + № en mono ── */
+.plaque, .lot-plaque {
+  display: inline-flex; align-items: center; gap: 0.28em;
+  font-family: var(--app-font-mono);
+  font-weight: 600;
+  color: oklch(28% 0.02 55);
+  letter-spacing: 0.02em;
+  background:
+    linear-gradient(180deg, var(--maison-parchment), var(--maison-parchment-d));
+  border: 1px solid var(--maison-brass);
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0 / 0.55),
+    inset 0 -1px 2px oklch(40% 0.05 60 / 0.25),
+    0 1px 3px oklch(0% 0 0 / 0.45);
+  border-radius: 4px;
+}
+.lot-plaque {
+  font-size: 0.625rem;
+  padding: 0.15rem 0.4rem;
+  line-height: 1;
+}
+.lot-plaque .lot-hash { color: oklch(48% 0.10 75); font-weight: 700; }
+
+/* ── Cachet « ADJUGÉ » : cire laiton embossée, frappée en diagonale ── */
+.seal-adjuge {
+  display: inline-flex; flex-direction: column; align-items: center;
+  font-family: var(--app-font-display);
+  text-transform: uppercase;
+  color: var(--maison-brass-hi);
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--maison-brass);
+  border-radius: 7px;
+  transform: rotate(-8deg);
+  background:
+    radial-gradient(circle at 32% 26%, oklch(26% 0.10 25 / 0.9), transparent 72%),
+    linear-gradient(158deg, oklch(24% 0.09 28), oklch(18% 0.07 26));
+  box-shadow:
+    inset 0 1px 1px oklch(90% 0.10 85 / 0.35),
+    inset 0 -2px 4px oklch(0% 0 0 / 0.55),
+    0 4px 14px oklch(0% 0 0 / 0.5);
+  text-shadow: 0 1px 0 oklch(0% 0 0 / 0.5);
+}
+.seal-adjuge-main { font-weight: 800; font-size: 1.05rem; letter-spacing: 0.06em; line-height: 1; }
+.seal-adjuge-sub  { font-family: var(--app-font-mono); font-weight: 600; font-size: 0.5rem;
+  letter-spacing: 0.28em; color: var(--maison-brass); margin-top: 0.22em; }
+
+/* Le cachet s'abat une fois (le marteau tombe), puis reste embossé */
+@keyframes seal-slam {
+  0%   { opacity: 0; transform: rotate(-8deg) scale(2.5); filter: blur(3px); }
+  55%  { opacity: 1; transform: rotate(-8deg) scale(0.9);  filter: blur(0); }
+  75%  { transform: rotate(-8deg) scale(1.04); }
+  100% { opacity: 1; transform: rotate(-8deg) scale(1); }
+}
+.seal-slam { animation: seal-slam 300ms var(--ease-hammer) both; }
+@media (prefers-reduced-motion: reduce) {
+  .seal-slam { animation: none; opacity: 1; }
+}
+
+/* ── Le coup de marteau : micro-secousse sèche à l'adjudication ── */
+@keyframes gavel-shake {
+  0%   { transform: translate(0, 0); }
+  18%  { transform: translate(-2px, 1px); }
+  36%  { transform: translate(2px, -1px); }
+  54%  { transform: translate(-1.5px, 1px); }
+  72%  { transform: translate(1px, 0); }
+  100% { transform: translate(0, 0); }
+}
+.gavel-shake { animation: gavel-shake 220ms var(--ease-hammer); }
+@media (prefers-reduced-motion: reduce) { .gavel-shake { animation: none; } }
+
+/* Flash laiton bref au moment de l'adjudication */
+@keyframes brass-flash {
+  0% { opacity: 0; } 30% { opacity: 0.85; } 100% { opacity: 0; }
+}
+.brass-flash { animation: brass-flash 340ms var(--ease-hammer) both; }
+@media (prefers-reduced-motion: reduce) { .brass-flash { animation: none; opacity: 0; } }
+
+/* ── Carte-LOT : velours chaud, cadre à filet laiton, halo ember au survol ── */
+.card-lot {
+  position: relative;
+  background: linear-gradient(158deg, var(--maison-surface), var(--maison-bg-deep));
+  border: 1px solid oklch(78% 0.13 85 / 0.18);
+  border-radius: var(--r-lg);
+  box-shadow: var(--el-2);
+  transition: transform var(--dur-enter) var(--ease-out-expo),
+              box-shadow var(--dur-enter) var(--ease-out-expo),
+              border-color var(--dur-enter) var(--ease-out-expo);
+}
+.card-lot:hover {
+  transform: translateY(-4px);
+  border-color: oklch(78% 0.13 85 / 0.44);
+  box-shadow: var(--el-4), 0 0 46px oklch(68% 0.20 45 / 0.13);
+}
+.card-lot:active { transform: translateY(-1px) scale(0.995); }
+
+/* ── CTA marteau : plaque ember biseautée, liséré laiton (« Remporter ce lot ») ── */
+.btn-hammer {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-family: var(--app-font-display); font-weight: 700; letter-spacing: -0.01em;
+  color: oklch(98% 0.02 80);
+  background: linear-gradient(180deg, var(--maison-ember-hi), var(--maison-ember));
+  border: 1px solid oklch(78% 0.13 85 / 0.55);
+  border-radius: var(--r-md);
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0 / 0.28),
+    0 4px 16px oklch(68% 0.20 45 / 0.32);
+  transition: transform var(--dur-tick) var(--ease-out-expo),
+              box-shadow var(--dur-enter) var(--ease-out-expo);
+}
+.btn-hammer:hover {
+  box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.32), 0 8px 30px oklch(68% 0.20 45 / 0.45);
+  transform: translateY(-2px);
+}
+.btn-hammer:active { transform: translateY(0) scale(0.98); }
+
+/* ── Le spot qui balaie (révélation de lot — prêt pour la fiche produit) ── */
+@keyframes spotlight-sweep {
+  0%   { opacity: 0; transform: translateY(-40%) scaleY(0.6); }
+  40%  { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(30%) scaleY(1.2); }
+}
+.spotlight-sweep {
+  pointer-events: none; position: absolute; inset: -20% 0 auto 0; height: 140%;
+  background: linear-gradient(180deg, oklch(78% 0.13 85 / 0.22), transparent 70%);
+  mix-blend-mode: screen;
+  animation: spotlight-sweep var(--dur-drop) var(--ease-out-expo) both;
+}
+@media (prefers-reduced-motion: reduce) { .spotlight-sweep { animation: none; opacity: 0; } }
+
+/* Le laiton devient le focus de la maison (au lieu du vif) */
+:focus-visible { outline-color: var(--maison-brass); }
+::selection { background: oklch(78% 0.13 85 / 0.28); }
+
+/* Zoom média au survol des cartes-lots (conserve le comportement de card-premium) */
+.card-lot { overflow: hidden; }
+.card-lot .media-zoom { transition: transform var(--dur-drop) var(--ease-out-expo); }
+.card-lot:hover .media-zoom { transform: scale(1.06); }

@@ -5,6 +5,8 @@ import { localized } from '@/lib/i18n/dictionaries';
 import { useCurrency, displayMoney } from '@/lib/currency/CurrencyContext';
 import { createClient } from '@/lib/supabase/client';
 import CardActions from './CardActions';
+import LotNumber from './LotNumber';
+import SoldSeal from './SoldSeal';
 
 function mediaUrl(path) {
   return path
@@ -13,13 +15,10 @@ function mediaUrl(path) {
 }
 
 /**
- * Carte d'un produit en vente flash — home (rail) et /flash.
- * Style DISTINCT des cartes normales (aura vermillon, filet de tension).
- * Placement de badges fixe et élégant :
- *   - haut-gauche : "Dernière pièce" (rareté), place réservée, ne bouge jamais
- *   - haut-droite : badge FLASH
- *   - le sceau de remise est intégré à la ligne de prix (ne cache pas l'image)
- * Quick Look + panier au prix flash (CardActions).
+ * Carte d'un LOT en vacation (vente flash) — home (rail) et /flash.
+ * Style DISTINCT (aura ember, filet de tension vermillon rationné).
+ * Placement fixe : haut-gauche = rareté · haut-droite = FLASH · bas-gauche = № de LOT.
+ * Sold-out = cachet ADJUGÉ · VENDU (preuve de désir). Prix flash + Realtime stock.
  */
 export default function FlashCard({ item, locale = 'fr', variant = 'grid', labels = {} }) {
   const cur = useCurrency();
@@ -64,7 +63,7 @@ export default function FlashCard({ item, locale = 'fr', variant = 'grid', label
     <div className={wrapCls}>
       <Link href={`/product/${p.slug}`} className="relative aspect-product overflow-hidden bg-app-surface-2 block">
         <div className="absolute inset-0 opacity-80 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse 72% 62% at 50% 42%, oklch(62% 0.24 25 / 0.22), transparent 70%)' }} />
+          style={{ background: 'radial-gradient(ellipse 72% 62% at 50% 42%, oklch(68% 0.20 45 / 0.22), transparent 70%)' }} />
         {imgUrl ? (
           <img src={imgUrl} alt={localized(p.title, locale)} loading="lazy"
             className="relative w-full h-full object-contain p-3 transition-transform duration-[600ms] ease-out-expo group-hover:scale-105" />
@@ -74,10 +73,8 @@ export default function FlashCard({ item, locale = 'fr', variant = 'grid', label
 
         {/* Haut-gauche : rareté (place réservée, hauteur fixe pour ne pas décaler) */}
         <div className="absolute top-2.5 left-2.5 z-10 min-h-[22px]">
-          {soldOut ? (
-            <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-black/70 backdrop-blur text-app-muted">Épuisé</span>
-          ) : lastPiece ? (
-            <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-[color:var(--app-accent)]/90 text-white pulse-last backdrop-blur">Dernière pièce</span>
+          {soldOut ? null : lastPiece ? (
+            <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-[color:var(--app-accent)]/90 text-white pulse-last backdrop-blur">Dernière enchère</span>
           ) : remaining <= 3 ? (
             <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-black/60 backdrop-blur text-white num">Plus que {remaining}</span>
           ) : null}
@@ -88,8 +85,17 @@ export default function FlashCard({ item, locale = 'fr', variant = 'grid', label
           <span className="w-1.5 h-1.5 rounded-full bg-white pulse-last" /> Flash
         </span>
 
-        {/* Actions panier + quick look */}
-        <CardActions product={flashProduct} quickLookPos="top-left" />
+        {/* Bas-gauche : № de LOT */}
+        <LotNumber product={p} className="absolute bottom-2.5 left-2.5 z-10" />
+
+        {/* Sold-out : cachet ADJUGÉ · VENDU ; sinon actions (aperçu + marteau) */}
+        {soldOut ? (
+          <div className="absolute inset-0 z-20 grid place-items-center bg-black/50 backdrop-blur-[1px]">
+            <SoldSeal variant="sold" />
+          </div>
+        ) : (
+          <CardActions product={flashProduct} quickLookPos="top-left" />
+        )}
       </Link>
 
       <div className="p-3.5 flex flex-col gap-2.5 flex-1">
@@ -107,7 +113,7 @@ export default function FlashCard({ item, locale = 'fr', variant = 'grid', label
           <div>
             <div className="stock-gauge"><div style={{ width: `${gaugePct}%` }} /></div>
             <p className={`mt-1 text-[11px] ${lastPiece ? 'num-tension font-bold' : 'text-app-muted num'}`}>
-              {soldOut ? (labels.left ? 'Épuisé' : 'Épuisé') : lastPiece ? (labels.lastPiece ?? 'Dernière pièce') : `${remaining} ${labels.left ?? 'restant'}`}
+              {soldOut ? 'Adjugé · vendu' : lastPiece ? (labels.lastPiece ?? 'Dernière enchère') : `${remaining} ${labels.left ?? 'restant'}`}
             </p>
           </div>
         </div>
