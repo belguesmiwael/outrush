@@ -757,3 +757,114 @@ body {
 .card-lot { overflow: hidden; }
 .card-lot .media-zoom { transition: transform var(--dur-drop) var(--ease-out-expo); }
 .card-lot:hover .media-zoom { transform: scale(1.06); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   LA CRIÉE — sections éditoriales de la salle (home + vacation)
+   rythme, contraste de formats, pédagogie, preuve réelle. Réversible.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Le bandeau du crieur : fine bande veloutée, filets laiton, annonces ── */
+.criee-band {
+  position: relative;
+  background:
+    linear-gradient(180deg, oklch(20% 0.07 25 / 0.55), oklch(15% 0.018 40 / 0.2));
+  border-top: 1px solid oklch(78% 0.13 85 / 0.22);
+  border-bottom: 1px solid oklch(78% 0.13 85 / 0.22);
+}
+.criee-band .crieur-item {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  font-family: var(--app-font-mono);
+  font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--maison-parchment);
+}
+.criee-band .crieur-sep { color: var(--maison-brass); opacity: 0.7; }
+
+/* ── Vitrine éditoriale plein cadre (image uploadée OU placeholder voulu) ── */
+.vitrine {
+  position: relative; overflow: hidden; isolation: isolate;
+  border-radius: var(--r-xl);
+  border: 1px solid oklch(78% 0.13 85 / 0.22);
+  box-shadow: var(--el-3);
+}
+.vitrine-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  transform: scale(1.02); transition: transform 1.2s var(--ease-out-expo); }
+.vitrine:hover .vitrine-media { transform: scale(1.06); }
+/* Placeholder « voulu » : salle veloutée éclairée au laiton + monogramme filigrane */
+.vitrine-fallback {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 80% at 50% -10%, oklch(78% 0.13 85 / 0.14), transparent 60%),
+    radial-gradient(ellipse 90% 70% at 50% 120%, oklch(68% 0.20 45 / 0.10), transparent 60%),
+    linear-gradient(158deg, oklch(24% 0.09 26), oklch(14% 0.03 30));
+}
+.vitrine-fallback::before {
+  content: "№"; position: absolute; inset: 0; display: grid; place-items: center;
+  font-family: var(--app-font-display); font-size: 30vw; line-height: 1;
+  color: oklch(78% 0.13 85 / 0.06); pointer-events: none;
+}
+.vitrine-fallback::after {
+  content: ""; position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='v'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23v)' opacity='0.05'/%3E%3C/svg%3E");
+}
+/* Voile pour lisibilité du texte HTML par-dessus (jamais de texte gravé dans l'image) */
+.vitrine-scrim { position: absolute; inset: 0;
+  background: linear-gradient(90deg, oklch(10% 0.02 30 / 0.82) 0%, oklch(10% 0.02 30 / 0.45) 45%, transparent 78%); }
+.vitrine-scrim-center { background: radial-gradient(ellipse at center, oklch(10% 0.02 30 / 0.35), oklch(10% 0.02 30 / 0.78)); }
+
+/* ── De la marque au marteau : la pédagogie du prix (flow à jetons laiton) ── */
+.flow-marteau { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; }
+.flow-step {
+  flex: 1 1 0; min-width: 120px; position: relative;
+  padding: 1.1rem 1rem; text-align: center;
+}
+.flow-step + .flow-step::before {
+  content: "→"; position: absolute; left: -0.35em; top: 50%; transform: translateY(-50%);
+  color: var(--maison-brass); font-family: var(--app-font-mono); opacity: 0.7;
+}
+.flow-step .flow-k { font-family: var(--app-font-mono); font-size: 0.62rem; letter-spacing: 0.28em;
+  text-transform: uppercase; color: var(--app-text-muted); }
+.flow-step .flow-v { font-family: var(--app-font-display); font-weight: 700; margin-top: 0.35rem; line-height: 1.1; }
+.flow-step.flow-final .flow-v { color: var(--maison-brass); }
+@media (max-width: 640px) {
+  .flow-step + .flow-step::before { content: "↓"; left: 50%; top: -0.35em; transform: translateX(-50%); }
+  .flow-marteau { flex-direction: column; }
+}
+
+/* ── Les maisons représentées : bande de marques (marquee laiton sur velours) ── */
+.maisons-item {
+  font-family: var(--app-font-display); font-weight: 700; font-size: 1.35rem;
+  letter-spacing: -0.01em; color: var(--maison-parchment); opacity: 0.72;
+  white-space: nowrap; transition: opacity var(--dur-enter) var(--ease-out-expo);
+}
+.maisons-item:hover { opacity: 1; color: var(--maison-brass-hi); }
+
+/* ── La salle en direct : tuiles de statistiques réelles ── */
+.salle-stat {
+  position: relative; padding: 1.4rem 1.25rem; border-radius: var(--r-lg);
+  background: linear-gradient(158deg, var(--maison-surface), var(--maison-bg-deep));
+  border: 1px solid oklch(78% 0.13 85 / 0.18);
+}
+.salle-stat .stat-n { font-family: var(--app-font-mono); font-weight: 700; font-size: 2.4rem;
+  line-height: 1; color: var(--maison-brass-hi); letter-spacing: -0.02em; }
+.salle-stat .stat-k { font-family: var(--app-font-mono); font-size: 0.62rem; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--app-text-muted); margin-top: 0.5rem; }
+
+/* ── Ticker des dernières adjudications (rotation de VRAIS lots vendus) ── */
+.adjuge-pill {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  padding: 0.5rem 0.9rem; border-radius: 999px;
+  background: oklch(20% 0.07 25 / 0.5); border: 1px solid oklch(78% 0.13 85 / 0.25);
+}
+.adjuge-pill .dot { width: 7px; height: 7px; border-radius: 999px; background: var(--maison-brass); }
+@keyframes adjuge-in { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: translateY(0); } }
+.adjuge-in { animation: adjuge-in var(--dur-reveal) var(--ease-out-expo); }
+@media (prefers-reduced-motion: reduce) { .adjuge-in { animation: none; } }
+
+/* ── Chrono de vacation géant (laiton, /flash) ── */
+.chrono-vacation { font-family: var(--app-font-mono); font-weight: 700; color: var(--maison-brass-hi);
+  letter-spacing: -0.02em; text-shadow: 0 0 30px oklch(78% 0.13 85 / 0.25); }
+.criee-call { font-family: var(--app-font-display); font-style: italic; color: var(--maison-ember-hi);
+  font-weight: 600; }
+@keyframes call-pulse { 0%,100% { opacity: 0.85; } 50% { opacity: 1; text-shadow: 0 0 24px oklch(68% 0.20 45 / 0.6); } }
+.call-pulse { animation: call-pulse 1.2s var(--ease-out-expo) infinite; }
+@media (prefers-reduced-motion: reduce) { .call-pulse { animation: none; } }

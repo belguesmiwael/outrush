@@ -3,8 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { localized, t } from '@/lib/i18n/dictionaries';
 import Countdown from '@/components/shop/Countdown';
 import FlashCard from '@/components/shop/FlashCard';
-import LiveStockGauge from '@/components/shop/LiveStockGauge';
-import Money from '@/components/shop/Money';
+import VacationLive from '@/components/shop/VacationLive';
+import { Gavel } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +12,6 @@ export default async function FlashPage() {
   const locale = 'fr';
   const supabase = await createClient();
   const serverNow = new Date().toISOString();
-  // Un drop est visible s'il est dans sa fenêtre horaire, OU marqué 'live' manuellement
   const { data: allSales } = await supabase
     .from('flash_sales')
     .select('id, title, ends_at, starts_at, status, flash_sale_items(id, flash_price, allocated_qty, remaining_qty, product:products(slug, title, brand, images, market_price, outlet_price, currency))')
@@ -24,28 +23,41 @@ export default async function FlashPage() {
   );
 
   return (
-    <main className="min-h-dvh max-w-7xl mx-auto px-4 py-8 space-y-10">
+    <main className="min-h-dvh max-w-7xl mx-auto px-4 py-8 space-y-14">
       <Link href="/" className="text-sm text-app-muted hover:text-app-text transition-colors duration-120">← OUTRUSH</Link>
+
       {(sales ?? []).length === 0 ? (
-        <div className="card-hunt p-16 text-center space-y-3">
-          <div className="font-display text-6xl text-app-accent opacity-40 select-none">⏱</div>
-          <p className="text-app-muted">{t(locale, 'hunt_empty')}</p>
+        <div className="card-lot p-16 text-center space-y-4">
+          <Gavel size={52} strokeWidth={1.3} className="mx-auto text-app-loot opacity-45" />
+          <h1 className="font-display font-bold text-2xl">Aucune vacation en cours</h1>
+          <p className="text-app-muted max-w-sm mx-auto">La salle est fermée pour l'instant. La prochaine vacation ouvrira bientôt — revenez pour le coup de marteau.</p>
+          <Link href="/shop" className="btn-hammer px-6 py-3 inline-flex mt-2">Parcourir le catalogue</Link>
         </div>
       ) : (
-        sales.map((sale) => (
-          <section key={sale.id} className="space-y-6">
-            <div className="text-center space-y-2 py-6">
-              <h1 className="font-display font-extrabold text-4xl">{localized(sale.title, locale)}</h1>
-              <Countdown endsAt={sale.ends_at} serverNow={serverNow} className="text-6xl text-app-accent" />
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {(sale.flash_sale_items ?? []).filter((i) => i.product).map((item) => (
-                <FlashCard key={item.id} item={item} locale={locale}
-                  labels={{ lastPiece: t(locale, 'last_piece'), left: t(locale, 'stock_left') }} />
-              ))}
-            </div>
-          </section>
-        ))
+        sales.map((sale) => {
+          const liveItems = (sale.flash_sale_items ?? []).filter((i) => i.product);
+          return (
+            <section key={sale.id} className="space-y-8">
+              {/* Le pupitre : titre, chrono laiton géant, la salle */}
+              <div className="text-center space-y-4 py-8 relative">
+                <div className="absolute inset-x-0 top-0 h-40 pointer-events-none" style={{ background: 'radial-gradient(ellipse 50% 100% at 50% 0%, oklch(78% 0.13 85 / 0.12), transparent 70%)' }} />
+                <p className="eyebrow eyebrow-hot relative">Vacation en direct</p>
+                <h1 className="display-hero text-4xl md:text-6xl relative">{localized(sale.title, locale)}</h1>
+                <Countdown endsAt={sale.ends_at} serverNow={serverNow} className="chrono-vacation text-6xl md:text-7xl block relative" />
+                <div className="relative">
+                  <VacationLive saleId={sale.id} endsAt={sale.ends_at} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {liveItems.map((item) => (
+                  <FlashCard key={item.id} item={item} locale={locale}
+                    labels={{ lastPiece: t(locale, 'last_piece'), left: t(locale, 'stock_left') }} />
+                ))}
+              </div>
+            </section>
+          );
+        })
       )}
     </main>
   );
