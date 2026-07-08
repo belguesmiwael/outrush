@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { generatePackSuggestions, updatePackPerformance } from '@/lib/packs/engine';
+import { generatePackSuggestions, updatePackPerformance, classifyStock } from '@/lib/packs/engine';
+import { rotateAndCompose } from '@/lib/packs/autocompose';
 
 export const maxDuration = 60;
 
@@ -17,58 +18,23 @@ export async function GET(request) {
   }
   const admin = createAdminClient();
 
-  const since14 = new Date(Date.now() - 14 * 86400_000).toISOString();
-  const since30 = new Date(Date.now() - 30 * 86400_000).toISOString();
-
-  const [{ data: products }, { data: sales }] = await Promise.all([
-    admin.from('products').select('id, created_at, quantity').eq('status', 'published').limit(5000),
-    admin
-      .from('inventory_movements')
-      .select('product_id, delta, created_at')
-      .in('reason', ['sale', 'flash_claim'])
-      .gte('created_at', since30)
-      .limit(50000),
-  ]);
-
-  const soldBy = new Map();
-  (sales ?? []).forEach((m) => {
-    const rec = soldBy.get(m.product_id) ?? { d14: 0, d30: 0 };
-    const units = Math.abs(m.delta);
-    rec.d30 += units;
-    if (m.created_at >= since14) rec.d14 += units;
-    soldBy.set(m.product_id, rec);
-  });
-
-  let updated = 0;
-  for (const p of products ?? []) {
-    const rec = soldBy.get(p.id) ?? { d14: 0, d30: 0 };
-    const v14 = Math.round((rec.d14 / 14) * 1000) / 1000;
-    const v30 = Math.round((rec.d30 / 30) * 1000) / 1000;
-    const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400_000;
-
-    let cls = 'new';
-    if (ageDays > 7) {
-      if (v14 >= 0.5) cls = 'hero';
-      else if (v30 >= 0.1) cls = 'stable';
-      else cls = 'dormant';
-    }
-
-    const { error } = await admin
-      .from('products')
-      .update({ velocity_14d: v14, velocity_30d: v30, stock_class: cls })
-      .eq('id', p.id);
-    if (!error) updated++;
-  }
+  // 1) Classification hero/stable/dormant (vélocité, ou proxy si catalogue jeune)
+  const { classified: updated } = await classifyStock(admin);
 
   // 2) Boucle d'apprentissage : performance des packs récents → pondérations
   const perf = await updatePackPerformance(admin);
   // 3) Moteur de packs : top-3 suggestions par dormant
   const packs = await generatePackSuggestions(admin);
+  // 4) LA CRIÉE — renouvellement quotidien : archive les lots auto de la veille
+  //    et compose des lots frais avec noms IA (rotation = rareté "aujourd'hui").
+  const lots = await rotateAndCompose(admin, { count: 4, composeImage: true });
 
   return NextResponse.json({
     ok: true,
     classified: updated,
     pack_performance_updated: perf.updated,
     pack_suggestions: packs.suggested,
+    lots_composed: lots.created,
+    lots_rotated: lots.archived,
   });
 }

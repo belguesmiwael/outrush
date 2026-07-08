@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
-import { createPackFromSuggestion, dismissSuggestion, generatePacksBulk } from '@/lib/actions/packs';
+import { createPackFromSuggestion, dismissSuggestion, generatePacksBulk, composeLotsNow } from '@/lib/actions/packs';
 import { localized } from '@/lib/i18n/dictionaries';
 import { formatPrice } from '@/lib/utils';
+import { Gavel } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,6 +59,28 @@ export default async function StockPage() {
       <div>
         <h1 className="font-display font-bold text-3xl">Stock Intelligence</h1>
         <p className="text-app-muted mt-1">Aucun stock ne meurt ici.</p>
+      </div>
+
+      {/* La composition du jour — l'IA marie héros × dormants en LOTS nommés,
+          automatiquement toutes les 24 h. Rotation quotidienne = rareté. */}
+      <div className="card-lot p-6 flex items-start gap-5 flex-wrap md:flex-nowrap">
+        <div className="w-12 h-12 rounded-xl grid place-items-center bg-app-loot/12 border border-app-loot/30 shrink-0">
+          <Gavel size={22} strokeWidth={1.8} className="text-app-loot" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="eyebrow eyebrow-hot">Renouvellement automatique · 24 h</p>
+          <h2 className="font-display font-bold text-xl mt-1">La composition du jour</h2>
+          <p className="text-app-muted text-sm mt-1 max-w-2xl">
+            Chaque nuit, l'IA marie les pièces vedettes avec les dormants compatibles, leur donne
+            un nom désirable et un argumentaire, publie les lots du jour et archive ceux de la veille.
+            Les lots d'aujourd'hui ne seront plus là demain — c'est ce qui crée l'urgence.
+          </p>
+        </div>
+        <form action={composeLotsNow} className="shrink-0">
+          <button className="btn-hammer px-6 py-3 inline-flex whitespace-nowrap">
+            <Gavel size={16} strokeWidth={2} /> Composer les lots du jour
+          </button>
+        </form>
       </div>
 
       {/* Répartition — barre segmentée + compteurs */}

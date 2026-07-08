@@ -329,9 +329,9 @@ export default async function HomePage() {
       {/* LE CABINET — packs (lots mariés) */}
       {packs?.length ? (
         <section className="max-w-7xl mx-auto px-4 pt-8">
-          <p className="eyebrow">Assemblés par la maison</p>
+          <p className="eyebrow">Assemblés par la maison · renouvelés chaque nuit</p>
           <h2 className="font-display font-bold text-2xl md:text-3xl mt-1 mb-2">Le cabinet — lots mariés</h2>
-          <p className="text-app-muted mb-6">Des pièces réunies pour aller ensemble — adjugées moins cher qu'à l'unité.</p>
+          <p className="text-app-muted mb-6">Des pièces réunies pour aller ensemble, adjugées moins cher qu'à l'unité. Les lots du jour partent avec la journée.</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {packs.map((pk, i) => {
               const sumOutlet = (pk.pack_items ?? []).reduce((s, it) => s + Number(it.product?.outlet_price ?? 0) * it.qty, 0);
