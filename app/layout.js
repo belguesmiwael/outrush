@@ -41,7 +41,11 @@ export const metadata = {
   manifest: '/manifest.json',
 };
 
-export const dynamic = 'force-dynamic';
+// Cache court des données globales (devise/flash) → le layout n'est plus rendu
+// dynamiquement à chaque requête. Les pages publiques peuvent être servies en ISR
+// (TTFB mobile bien plus rapide). Les pages qui le nécessitent gardent leur propre
+// `dynamic`/`revalidate`.
+export const revalidate = 60;
 
 export const viewport = {
   themeColor: '#191410',
@@ -58,10 +62,18 @@ export default async function RootLayout({ children }) {
   const initialFlash = Object.fromEntries(
     [...flashMap.entries()].map(([id, f]) => [id, { price: f.flashPrice, remaining: f.remaining, endsAt: f.endsAt }])
   );
+  let supabaseOrigin = null;
+  try { supabaseOrigin = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin; } catch { /* noop */ }
 
   return (
     <html lang="fr" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body>
+        {supabaseOrigin ? (
+          <>
+            <link rel="preconnect" href={supabaseOrigin} crossOrigin="anonymous" />
+            <link rel="dns-prefetch" href={supabaseOrigin} />
+          </>
+        ) : null}
         <CurrencyProvider currency={currency} rate={rate}>
           <FlashLiveProvider initial={initialFlash}>
             <CartProvider>

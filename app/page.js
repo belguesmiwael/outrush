@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/server';
+import Image from 'next/image';
+import { createPublicClient } from '@/lib/supabase/public';
 import { localized, t } from '@/lib/i18n/dictionaries';
 import { discountPct } from '@/lib/utils';
 import Money from '@/components/shop/Money';
@@ -22,7 +23,7 @@ export const revalidate = 60;
 
 export default async function HomePage() {
   const locale = 'fr';
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const serverNow = new Date().toISOString();
 
   const [{ data: flash }, { data: products }, { data: bestSellers }, { data: packs }, { data: categories }, { count: catalogueCount }] = await Promise.all([
@@ -343,8 +344,7 @@ export default async function HomePage() {
                 <Link key={pk.id} href={`/pack/${pk.slug}`} className="card-lot rise-in overflow-hidden group" style={{ animationDelay: `${i * 60}ms` }}>
                   <div className="aspect-[3/2] bg-app-surface-2 relative overflow-hidden">
                     {img ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={img} alt="" className="media-zoom w-full h-full object-cover" />
+                      <Image src={img} alt="" fill sizes="(max-width: 640px) 100vw, 33vw" className="media-zoom object-cover" />
                     ) : (
                       <div className="vitrine-fallback" aria-hidden="true" />
                     )}
