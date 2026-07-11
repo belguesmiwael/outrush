@@ -109,8 +109,8 @@ h1, h2, h3, .display { font-family: var(--app-font-display), var(--app-font-body
 
 /* Révélation prix barré → outlet */
 @keyframes price-reveal {
-  0%   { opacity: 0; transform: translateY(6px) scale(0.96); filter: blur(2px); }
-  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  0%   { opacity: 0; transform: translateY(6px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 .price-reveal { animation: price-reveal var(--dur-reveal) var(--ease-out-expo) both; }
 
@@ -174,11 +174,17 @@ h1, h2, h3, .display { font-family: var(--app-font-display), var(--app-font-body
 
 /* Pulsation "Dernière pièce" — urgence incandescente */
 @keyframes pulseLast {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(62% 0.24 25 / 0.5); }
-  50%      { box-shadow: 0 0 0 6px oklch(62% 0.24 25 / 0); }
+  0%   { transform: scale(1);   opacity: 0.55; }
+  100% { transform: scale(1.7); opacity: 0; }
 }
-.pulse-last { animation: pulseLast 1.6s cubic-bezier(0.16,1,0.3,1) infinite; }
-@media (prefers-reduced-motion: reduce) { .pulse-last { animation: none; } }
+.pulse-last { position: relative; }
+.pulse-last::after {
+  content: ""; position: absolute; inset: -2px; border-radius: inherit;
+  border: 2px solid oklch(62% 0.24 25 / 0.6); pointer-events: none;
+  animation: pulseLast 1.6s cubic-bezier(0.16,1,0.3,1) infinite;
+  will-change: transform, opacity;
+}
+@media (prefers-reduced-motion: reduce) { .pulse-last::after { animation: none; } }
 
 /* ═══════════════════════════════════════════════════════
    OBSIDIAN RUSH — couche design premium (refonte)

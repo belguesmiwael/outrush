@@ -26,7 +26,7 @@ export default function CartDrawer() {
       >
         <div className="flex items-center justify-between p-5 border-b border-white/5">
           <h2 className="font-display font-bold text-lg">Votre panier {count ? `(${count})` : ''}</h2>
-          <button onClick={() => setOpen(false)} className="text-app-muted hover:text-app-text leading-none"><X size={22} strokeWidth={2} /></button>
+          <button onClick={() => setOpen(false)} aria-label="Fermer le panier" className="text-app-muted hover:text-app-text leading-none"><X size={22} strokeWidth={2} /></button>
         </div>
 
         {items.length === 0 ? (

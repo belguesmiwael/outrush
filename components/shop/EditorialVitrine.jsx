@@ -1,17 +1,13 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 /**
  * LA CRIÉE — vitrine éditoriale plein cadre.
- * L'image vit dans le bucket public `product-media` sous `site/<name>`.
- * TANT QU'ELLE N'EST PAS UPLOADÉE : un placeholder velours+laiton s'affiche
- * (voulu, jamais « cassé »). Le texte est en HTML par-dessus — jamais gravé
- * dans l'image (mobile, i18n FR/EN/AR, SEO, animations).
- *
- * @param image  chemin dans le bucket, ex. "site/vitrine-luxe.jpg" (optionnel)
- * @param align  "left" (scrim latéral) | "center" (scrim radial)
- * @param height classes tailwind de hauteur
+ * Image optimisée par next/image (redimensionnée/AVIF) et LAZY (sous la ligne de
+ * flottaison → ne bloque pas le LCP du hero). Placeholder velours+laiton si absente.
+ * Texte en HTML par-dessus, jamais gravé dans l'image.
  */
 export default function EditorialVitrine({
   image,
@@ -33,8 +29,15 @@ export default function EditorialVitrine({
   const content = (
     <>
       {showImg ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt="" className="vitrine-media" loading="lazy" onError={() => setBroken(true)} />
+        <Image
+          src={src}
+          alt=""
+          fill
+          sizes="(max-width: 768px) 100vw, 1200px"
+          loading="lazy"
+          className="vitrine-media object-cover"
+          onError={() => setBroken(true)}
+        />
       ) : (
         <div className="vitrine-fallback" aria-hidden="true" />
       )}

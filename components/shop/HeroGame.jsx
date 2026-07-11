@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState, useCallback } from 'react';
+import Image from 'next/image';
 import { useCurrency, displayMoney } from '@/lib/currency/CurrencyContext';
 
 function mediaUrl(path) {
@@ -200,9 +201,9 @@ export default function HeroGame({ products = [], locale = 'fr' }) {
       {items.map((it) => (
         <div key={it.id} className="absolute z-10 pointer-events-none"
           style={{ left: `${it.x}%`, top: `${it.y}%`, transform: `translate(-50%,-50%) rotate(${it.rot}deg)` }}>
-          <div className="rounded-2xl overflow-hidden border border-white/15 shadow-lg"
+          <div className="relative rounded-2xl overflow-hidden border border-white/15 shadow-lg"
             style={{ width: it.size, height: it.size, background: 'oklch(20% 0.02 264)' }}>
-            {it.img ? <img src={it.img} alt="" className="w-full h-full object-cover" /> : null}
+            {it.img ? <Image src={it.img} alt="" fill sizes="96px" className="object-cover" /> : null}
           </div>
         </div>
       ))}
@@ -211,8 +212,8 @@ export default function HeroGame({ products = [], locale = 'fr' }) {
       {landed.map((l, i) => (
         <div key={l.id} className="absolute z-[9] pointer-events-none"
           style={{ left: `${l.x}%`, top: `${92 - (i % 3) * 2}%`, transform: `translate(-50%,-100%) rotate(${l.rot}deg)`, opacity: 0.55 }}>
-          <div className="w-12 h-12 rounded-xl overflow-hidden border border-white/10 grayscale" style={{ background: 'oklch(18% 0.02 264)' }}>
-            {l.img ? <img src={l.img} alt="" className="w-full h-full object-cover" /> : null}
+          <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-white/10 grayscale" style={{ background: 'oklch(18% 0.02 264)' }}>
+            {l.img ? <Image src={l.img} alt="" fill sizes="48px" className="object-cover" /> : null}
           </div>
         </div>
       ))}
