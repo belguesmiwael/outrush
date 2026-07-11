@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
-import { createPackFromSuggestion, dismissSuggestion, generatePacksBulk, composeLotsNow } from '@/lib/actions/packs';
+import { createPackFromSuggestion, dismissSuggestion, generatePacksBulk } from '@/lib/actions/packs';
+import ComposeLotsButton from '@/components/admin/ComposeLotsButton';
 import { localized } from '@/lib/i18n/dictionaries';
 import { formatPrice } from '@/lib/utils';
 import { Gavel } from 'lucide-react';
@@ -76,11 +77,9 @@ export default async function StockPage() {
             Les lots d'aujourd'hui ne seront plus là demain — c'est ce qui crée l'urgence.
           </p>
         </div>
-        <form action={composeLotsNow} className="shrink-0">
-          <button className="btn-hammer px-6 py-3 inline-flex whitespace-nowrap">
-            <Gavel size={16} strokeWidth={2} /> Composer les lots du jour
-          </button>
-        </form>
+        <div className="shrink-0">
+          <ComposeLotsButton />
+        </div>
       </div>
 
       {/* Répartition — barre segmentée + compteurs */}
