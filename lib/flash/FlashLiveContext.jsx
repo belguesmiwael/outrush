@@ -1,6 +1,5 @@
 'use client';
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
 
 const FlashLiveContext = createContext({ map: {}, ready: false });
 
@@ -8,12 +7,18 @@ export function useFlashLive() {
   return useContext(FlashLiveContext);
 }
 
-/** Récupère la photo des prix flash actifs (via la vue) et la garde à jour en Realtime. */
+/**
+ * Photo des prix flash actifs, tenue à jour en Realtime.
+ * Le client Supabase (Realtime) est importé DYNAMIQUEMENT dans l'effet (après
+ * l'hydratation) → il ne pèse plus sur le JS initial (meilleur FCP/LCP mobile).
+ * L'état initial vient du serveur, donc rien ne clignote avant la souscription.
+ */
 export function FlashLiveProvider({ initial = {}, children }) {
   const [map, setMap] = useState(initial);
 
   const refresh = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client');
       const supabase = createClient();
       const { data } = await supabase
         .from('active_flash_products')
@@ -31,16 +36,25 @@ export function FlashLiveProvider({ initial = {}, children }) {
   }, []);
 
   useEffect(() => {
-    const supabase = createClient();
-    // Toute modif sur les items ou les ventes flash → on rafraîchit la map
-    const channel = supabase
-      .channel('flash-live')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'flash_sale_items' }, refresh)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'flash_sales' }, refresh)
-      .subscribe();
-    // Rafraîchit aussi à intervalle léger pour capter l'expiration temporelle (ends_at)
+    let supabase = null;
+    let channel = null;
+    let cancelled = false;
+    (async () => {
+      const { createClient } = await import('@/lib/supabase/client');
+      if (cancelled) return;
+      supabase = createClient();
+      channel = supabase
+        .channel('flash-live')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'flash_sale_items' }, refresh)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'flash_sales' }, refresh)
+        .subscribe();
+    })();
     const iv = setInterval(refresh, 60000);
-    return () => { supabase.removeChannel(channel); clearInterval(iv); };
+    return () => {
+      cancelled = true;
+      if (supabase && channel) supabase.removeChannel(channel);
+      clearInterval(iv);
+    };
   }, [refresh]);
 
   return (

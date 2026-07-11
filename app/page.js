@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import PackCollage from '@/components/shop/PackCollage';
 import { createPublicClient } from '@/lib/supabase/public';
 import { localized, t } from '@/lib/i18n/dictionaries';
 import { discountPct } from '@/lib/utils';
@@ -49,7 +49,7 @@ export default async function HomePage() {
       .limit(12),
     supabase
       .from('packs')
-      .select('id, slug, title, narrative, composed_img, pack_price, pack_items(qty, product:products(outlet_price))')
+      .select('id, slug, title, narrative, composed_img, pack_price, pack_items(qty, product:products(outlet_price, images))')
       .eq('status', 'published')
       .order('created_at', { ascending: false })
       .limit(30),
@@ -337,18 +337,15 @@ export default async function HomePage() {
             {packs.map((pk, i) => {
               const sumOutlet = (pk.pack_items ?? []).reduce((s, it) => s + Number(it.product?.outlet_price ?? 0) * it.qty, 0);
               const pct = sumOutlet > 0 ? Math.round(((sumOutlet - Number(pk.pack_price)) / sumOutlet) * 100) : 0;
-              const img = pk.composed_img
-                ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-media/${pk.composed_img}`
-                : null;
+              const packImgs = (pk.pack_items ?? [])
+                .map((it) => (it.product?.images ?? [])[0])
+                .filter(Boolean)
+                .map((p) => `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-media/${p}`);
               return (
                 <Link key={pk.id} href={`/pack/${pk.slug}`} className="card-lot rise-in overflow-hidden group" style={{ animationDelay: `${i * 60}ms` }}>
                   <div className="aspect-[3/2] bg-app-surface-2 relative overflow-hidden">
-                    {img ? (
-                      <Image src={img} alt="" fill sizes="(max-width: 640px) 100vw, 33vw" className="media-zoom object-cover" />
-                    ) : (
-                      <div className="vitrine-fallback" aria-hidden="true" />
-                    )}
-                    {pct > 0 ? <span className="seal absolute top-3 left-3">CABINET −{pct}%</span> : null}
+                    <PackCollage images={packImgs} />
+                    {pct > 0 ? <span className="seal absolute top-3 left-3 z-10">CABINET −{pct}%</span> : null}
                   </div>
                   <div className="p-4">
                     <p className="font-medium leading-snug line-clamp-1">{localized(pk.title, locale)}</p>
