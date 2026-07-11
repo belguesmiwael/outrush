@@ -19,7 +19,7 @@ function mediaUrl(path) {
  * Le stock live vient du FlashLiveProvider (UN seul websocket pour toute la page)
  * au lieu d'un canal Realtime par carte → beaucoup moins de connexions sur mobile.
  */
-export default function FlashCard({ item, locale = 'fr', variant = 'grid', labels = {} }) {
+export default function FlashCard({ item, locale = 'fr', variant = 'grid', labels = {}, priority = false }) {
   const cur = useCurrency();
   const { map } = useFlashLive();
   const p = item.product;
@@ -60,6 +60,7 @@ export default function FlashCard({ item, locale = 'fr', variant = 'grid', label
                 alt={localized(p.title, locale)}
                 fill
                 sizes="(max-width: 640px) 50vw, 220px"
+                priority={priority}
                 className="object-contain transition-transform duration-[600ms] ease-out-expo group-hover:scale-105"
               />
             </div>

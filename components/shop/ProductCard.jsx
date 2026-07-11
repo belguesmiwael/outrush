@@ -9,7 +9,7 @@ import CardActions from './CardActions';
 import LotNumber from './LotNumber';
 import SoldSeal from './SoldSeal';
 
-export default function ProductCard({ product, locale = 'fr', index = 0, sold = 0 }) {
+export default function ProductCard({ product, locale = 'fr', index = 0, sold = 0, priority = false }) {
   const img = Array.isArray(product.images) ? product.images[0] : null;
   const imgUrl = img
     ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-media/${img}`
@@ -31,6 +31,7 @@ export default function ProductCard({ product, locale = 'fr', index = 0, sold = 
             alt={localized(product.title, locale)}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            priority={priority}
             className="media-zoom object-cover"
           />
         ) : (

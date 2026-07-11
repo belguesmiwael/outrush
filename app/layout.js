@@ -69,12 +69,8 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="fr" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body>
-        {supabaseOrigin ? (
-          <>
-            <link rel="preconnect" href={supabaseOrigin} crossOrigin="anonymous" />
-            <link rel="dns-prefetch" href={supabaseOrigin} />
-          </>
-        ) : null}
+        {/* dns-prefetch léger pour le Realtime (les images passent par /_next/image) */}
+        {supabaseOrigin ? <link rel="dns-prefetch" href={supabaseOrigin} /> : null}
         <CurrencyProvider currency={currency} rate={rate}>
           <FlashLiveProvider initial={initialFlash}>
             <CartProvider>

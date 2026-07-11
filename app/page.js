@@ -146,8 +146,8 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="flex gap-4 overflow-x-auto no-scrollbar pb-3 snap-x">
-            {(flash.flash_sale_items ?? []).filter((i) => i.product).map((item) => (
-              <FlashCard key={item.id} item={item} locale={locale} variant="rail"
+            {(flash.flash_sale_items ?? []).filter((i) => i.product).map((item, idx) => (
+              <FlashCard key={item.id} item={item} locale={locale} variant="rail" priority={idx === 0}
                 labels={{ lastPiece: t(locale, 'last_piece'), left: t(locale, 'stock_left') }} />
             ))}
           </div>
@@ -170,7 +170,7 @@ export default async function HomePage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-stretch">
             {dailyRush.map((p, i) => (
-              <ProductCard key={p.id} product={p} locale={locale} index={i} sold={soldById.get(p.id) ?? 0} />
+              <ProductCard key={p.id} product={p} locale={locale} index={i} sold={soldById.get(p.id) ?? 0} priority={i === 0} />
             ))}
           </div>
           <div className="mt-6 text-center">
