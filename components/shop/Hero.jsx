@@ -1,21 +1,41 @@
 'use client';
 import Link from 'next/link';
-import HeroGame from './HeroGame';
+import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
 
-/** Hero : la salle avant l'ouverture — espace de jeu « chinez le lot » + texte éditorial en surcouche. */
+// Le jeu est décoratif et lourd (rAF + audio) : on le sort du chemin critique.
+// Chargé côté client APRÈS le premier rendu → le LCP (le titre) se fige vite,
+// le TBT chute. Superposition en position absolue → aucun décalage (CLS = 0).
+const HeroGame = dynamic(() => import('./HeroGame'), { ssr: false, loading: () => null });
+
+/** Hero : la salle avant l'ouverture — texte éditorial + espace de jeu différé. */
 export default function Hero({ product, pct, products = [], locale = 'fr' }) {
+  const [showGame, setShowGame] = useState(false);
+
+  useEffect(() => {
+    // Monte le jeu quand le navigateur est libre (après le LCP), jamais avant.
+    let idle;
+    const start = () => setShowGame(true);
+    if ('requestIdleCallback' in window) {
+      idle = window.requestIdleCallback(start, { timeout: 2500 });
+      return () => window.cancelIdleCallback?.(idle);
+    }
+    idle = window.setTimeout(start, 1200);
+    return () => window.clearTimeout(idle);
+  }, []);
+
   return (
     <section className="relative overflow-hidden border-b border-app-loot/10 min-h-[560px] md:min-h-[600px]">
-      {/* Projecteur laiton en haut à gauche + braise en bas à droite (chaleur de salle) */}
+      {/* Projecteur laiton + braise (halos, aucune image) */}
       <div className="absolute -top-40 -left-32 w-[38rem] h-[38rem] rounded-full halo-live pointer-events-none"
         style={{ background: 'radial-gradient(circle, oklch(78% 0.13 85 / 0.14), transparent 65%)' }} />
       <div className="absolute -bottom-40 right-0 w-[30rem] h-[30rem] rounded-full halo-live pointer-events-none"
         style={{ background: 'radial-gradient(circle, oklch(68% 0.20 45 / 0.12), transparent 65%)', animationDelay: '2s' }} />
 
-      {/* Espace de jeu : les lots tombent sous le projecteur */}
-      <HeroGame products={products} locale={locale} />
+      {/* Espace de jeu — différé (hors chemin critique) */}
+      {showGame ? <HeroGame products={products} locale={locale} /> : null}
 
-      {/* Texte en surcouche, à gauche */}
+      {/* Texte en surcouche, à gauche (rendu serveur → LCP rapide) */}
       <div className="relative z-20 max-w-7xl mx-auto px-4 py-16 md:py-24 pointer-events-none">
         <div className="space-y-6 max-w-xl pointer-events-auto">
           <p className="eyebrow eyebrow-hot inline-flex items-center gap-2">

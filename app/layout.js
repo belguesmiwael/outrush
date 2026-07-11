@@ -10,29 +10,32 @@ import { FlashLiveProvider } from '@/lib/flash/FlashLiveContext';
 import { getActiveFlashMap } from '@/lib/flash/active';
 import { getCurrencySettings } from '@/lib/currency/server';
 
-// LA CRIÉE — Fraunces (serif chaud, axes SOFT+WONK) : la voix de la maison de ventes.
-// L'anti-Inter absolu. Titres de lot, hero, cachet « ADJUGÉ ».
+// LA CRIÉE — Fraunces (serif chaud, axes SOFT+WONK) : la voix de la maison.
+// Preload PRIORITAIRE : c'est la police du titre (élément LCP).
 const display = Fraunces({
   subsets: ['latin'],
   variable: '--app-font-display',
   axes: ['SOFT', 'WONK', 'opsz'],
   display: 'swap',
+  preload: true,
 });
 
-// Corps : Onest (neutre chaude, non-réflexe).
+// Corps : Onest — pas de preload (libère la bande passante pour le titre/LCP).
 const body = Onest({
   subsets: ['latin'],
   variable: '--app-font-body',
   weight: ['400', '500', '600', '700'],
   display: 'swap',
+  preload: false,
 });
 
-// Registre de la maison : n° de lot, prix au marteau, chrono.
+// Registre de la maison : n° de lot, prix au marteau, chrono. Pas de preload.
 const mono = Martian_Mono({
   subsets: ['latin'],
   variable: '--app-font-mono',
   weight: ['400', '500', '600', '700'],
   display: 'swap',
+  preload: false,
 });
 
 export const metadata = {
