@@ -1,9 +1,9 @@
 'use client';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { localized } from '@/lib/i18n/dictionaries';
 import { useCurrency, displayMoney } from '@/lib/currency/CurrencyContext';
-import { createClient } from '@/lib/supabase/client';
+import { useFlashLive } from '@/lib/flash/FlashLiveContext';
 import CardActions from './CardActions';
 import LotNumber from './LotNumber';
 import SoldSeal from './SoldSeal';
@@ -16,29 +16,17 @@ function mediaUrl(path) {
 
 /**
  * Carte d'un LOT en vacation (vente flash) — home (rail) et /flash.
- * Style DISTINCT (aura ember, filet de tension vermillon rationné).
- * Placement fixe : haut-gauche = rareté · haut-droite = FLASH · bas-gauche = № de LOT.
- * Sold-out = cachet ADJUGÉ · VENDU (preuve de désir). Prix flash + Realtime stock.
+ * Le stock live vient du FlashLiveProvider (UN seul websocket pour toute la page)
+ * au lieu d'un canal Realtime par carte → beaucoup moins de connexions sur mobile.
  */
 export default function FlashCard({ item, locale = 'fr', variant = 'grid', labels = {} }) {
   const cur = useCurrency();
+  const { map } = useFlashLive();
   const p = item.product;
-  const [remaining, setRemaining] = useState(item.remaining_qty);
 
-  // Stock flash live
-  useEffect(() => {
-    const supabase = createClient();
-    const ch = supabase
-      .channel(`flashcard:${item.id}`)
-      .on('postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'flash_sale_items', filter: `id=eq.${item.id}` },
-        (payload) => {
-          const n = Number(payload.new?.remaining_qty);
-          if (!Number.isNaN(n)) setRemaining(n);
-        })
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
-  }, [item.id]);
+  // Stock live partagé (fallback sur la valeur serveur initiale)
+  const live = p ? map?.[p.id] : null;
+  const remaining = live?.remaining ?? item.remaining_qty;
 
   if (!p) return null;
 
@@ -65,8 +53,17 @@ export default function FlashCard({ item, locale = 'fr', variant = 'grid', label
         <div className="absolute inset-0 opacity-80 pointer-events-none"
           style={{ background: 'radial-gradient(ellipse 72% 62% at 50% 42%, oklch(68% 0.20 45 / 0.22), transparent 70%)' }} />
         {imgUrl ? (
-          <img src={imgUrl} alt={localized(p.title, locale)} loading="lazy"
-            className="relative w-full h-full object-contain p-3 transition-transform duration-[600ms] ease-out-expo group-hover:scale-105" />
+          <div className="absolute inset-0 p-3">
+            <div className="relative w-full h-full">
+              <Image
+                src={imgUrl}
+                alt={localized(p.title, locale)}
+                fill
+                sizes="(max-width: 640px) 50vw, 220px"
+                className="object-contain transition-transform duration-[600ms] ease-out-expo group-hover:scale-105"
+              />
+            </div>
+          </div>
         ) : (
           <div className="w-full h-full grid place-items-center text-app-muted font-display text-4xl select-none">O</div>
         )}

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { localized } from '@/lib/i18n/dictionaries';
 import { scarcity } from '@/lib/rush/daily';
 import PriceReveal from './PriceReveal';
@@ -25,12 +26,12 @@ export default function ProductCard({ product, locale = 'fr', index = 0, sold = 
     >
       <div className="aspect-[4/5] bg-app-surface-2 relative overflow-hidden shrink-0">
         {imgUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={imgUrl}
             alt={localized(product.title, locale)}
-            className="media-zoom w-full h-full object-cover"
-            loading="lazy"
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="media-zoom object-cover"
           />
         ) : (
           <div className="w-full h-full grid place-items-center text-app-muted font-display text-4xl select-none">

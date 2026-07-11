@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Image from 'next/image';
 
 function mediaUrl(path) {
   return path ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-media/${path}` : null;
@@ -20,14 +21,16 @@ export default function ProductGallery({ images = [], alt = '' }) {
 
   return (
     <div className="space-y-3">
-      {/* Image principale */}
+      {/* Image principale (LCP → priority) */}
       <div className="card-premium overflow-hidden aspect-square relative bg-white/[0.02]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           key={active}
           src={mediaUrl(list[active])}
           alt={alt}
-          className="w-full h-full object-contain rise-in in"
+          fill
+          sizes="(max-width: 768px) 100vw, 45vw"
+          priority
+          className="object-contain rise-in in"
         />
       </div>
 
@@ -38,12 +41,11 @@ export default function ProductGallery({ images = [], alt = '' }) {
             <button
               key={img}
               onClick={() => setActive(i)}
-              className={`shrink-0 w-16 h-16 rounded-xl overflow-hidden border transition-all duration-220 ${
+              className={`relative shrink-0 w-16 h-16 rounded-xl overflow-hidden border transition-all duration-220 ${
                 i === active ? 'border-app-accent ring-1 ring-[color:var(--app-accent)]/40' : 'border-white/10 opacity-60 hover:opacity-100'
               }`}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={mediaUrl(img)} alt="" className="w-full h-full object-cover" />
+              <Image src={mediaUrl(img)} alt="" width={64} height={64} className="w-full h-full object-cover" />
             </button>
           ))}
         </div>
